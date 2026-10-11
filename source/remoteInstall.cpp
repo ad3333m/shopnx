@@ -1569,11 +1569,8 @@ namespace remoteInstStuff {
             return false;
         }
         if (fetch.responseCode == 401 || fetch.responseCode == 403) {
-            if (!inst::util::HasLegacyAuthSupport()) {
-                error = "This shop only accepts the official Tinfoil app (HAUTH signing), so ShopNX can't open it.";
-            } else {
-                error = "Shop requires authentication. Check credentials or enable public Shop.";
-            }
+            error = "The shop refused ShopNX (HTTP " + std::to_string(fetch.responseCode) + ").\n"
+                "Check the username and password. Some shops only let in one specific app (Tinfoil or DBI).";
             return false;
         }
         if (!fetch.decodeError.empty()) {
