@@ -358,7 +358,7 @@ namespace inst::ui {
         this->remoteFormShade = Rectangle::New(0, 74, 1280, 586, COLOR("#00000088"));
         this->remoteFormBorder = Rectangle::New(238, 80, 804, 574, inst::config::oledMode ? COLOR("#FFFFFF66") : COLOR("#141A2EFF"));
         this->remoteFormPanel = Rectangle::New(241, 83, 798, 568, inst::config::oledMode ? COLOR("#000000FA") : COLOR("#141A2EFA"));
-        this->remoteFormTitle = TextBlock::New(270, 104, "Remote", 32);
+        this->remoteFormTitle = TextBlock::New(270, 104, "Shop", 32);
         this->remoteFormHint = TextBlock::New(270, 614, " Edit/Select     Cancel", 20);
         this->remoteFormMenu = Menu::New(260, 140, 760, COLOR("#00000000"), 46, 10, 24);
         this->remoteFormMenu->SetOnFocusColor(inst::config::oledMode ? COLOR("#FFFFFF33") : COLOR("#00000070"));
@@ -465,7 +465,7 @@ namespace inst::ui {
     }
 
     void optionsPage::setSectionNavText() {
-        static const std::vector<std::string> sectionLabels = {"General", "Remote", "System"};
+        static const std::vector<std::string> sectionLabels = {"General", "Shop", "System"};
         for (size_t i = 0; i < this->sectionTexts.size() && i < sectionLabels.size(); i++) {
             const bool selected = static_cast<int>(i) == this->selectedSection;
             this->sectionHighlights[i]->SetColor(selected
@@ -515,14 +515,14 @@ namespace inst::ui {
             else
                 dbVersion = inst::util::shortenString(dbVersion, 24, false);
             const std::string activeLabel = inst::util::shortenString(ActiveRemoteLabel(remotes), 38, false);
-            addItem("Remotes: " + activeLabel + " (" + std::to_string(remotes.size()) + " saved)", false, false);
-            addItem("Add new Remote", false, false);
+            addItem("Shops: " + activeLabel + " (" + std::to_string(remotes.size()) + " saved)", false, false);
+            addItem("Add new Shop", false, false);
             const std::string uaMode = inst::config::remoteLegacyMode ? "tinfoil" : inst::config::httpUserAgentMode;
             addItem("User-Agent profile: " + GetUserAgentProfileLabel(uaMode), false, false);
             auto items = this->menu->GetItems();
             if (inst::config::remoteLegacyMode && items.size() > 3 && items[3] != nullptr)
                 items[3]->SetColor(COLOR("#FFFFFF88"));
-            addItem("Tinfoil Mode (legacy Remote compatibility)", true, inst::config::remoteLegacyMode);
+            addItem("Tinfoil Mode (legacy Shop compatibility)", true, inst::config::remoteLegacyMode);
             addItem("options.menu_items.remote_hide_installed"_lang, true, inst::config::remoteHideInstalled);
             addItem("options.menu_items.remote_hide_installed_section"_lang, true, inst::config::remoteHideInstalledSection);
             addItem("Hide cheats not matching local build / installed title", true, inst::config::remoteHideIncompatibleCheats);
@@ -552,9 +552,9 @@ namespace inst::ui {
         this->remoteListVisible = true;
         this->remoteListIndex = std::max(0, selectedIndex);
         this->tabsFocused = false;
-        this->pageInfoText->SetText("Memorized Remotes (" + std::to_string(this->remoteListProfiles.size()) + ")");
+        this->pageInfoText->SetText("Memorized Shops (" + std::to_string(this->remoteListProfiles.size()) + ")");
 
-        const std::string hint = " Manage Remote     Back";
+        const std::string hint = " Manage Shop     Back";
         this->butText->SetText(hint);
         this->bottomHintSegments = BuildBottomHintSegments(hint, 10, 20);
 
@@ -658,7 +658,7 @@ namespace inst::ui {
             "Password                                      " + password,
             "Title                                         " + fieldValue(this->remoteFormProfile.title, "Required"),
             "Favourite                                     " + favourite,
-            "Save Remote"
+            "Save Shop"
         };
         const int selected = std::max(0, this->remoteFormMenu->GetSelectedIndex());
         this->remoteFormMenu->ClearItems();
@@ -705,7 +705,7 @@ namespace inst::ui {
             return;
         }
         if (field == 2) {
-            const std::string endpoint = TrimString(inst::util::softwareKeyboard("Enter Remote host or IP", this->remoteFormProfile.host, 200));
+            const std::string endpoint = TrimString(inst::util::softwareKeyboard("Enter Shop host or IP", this->remoteFormProfile.host, 200));
             if (!endpoint.empty()) {
                 const bool hasScheme = endpoint.rfind("http://", 0) == 0 || endpoint.rfind("https://", 0) == 0;
                 const std::string rawEndpoint = hasScheme ? endpoint : (this->remoteFormProfile.protocol + "://" + endpoint);
@@ -719,11 +719,11 @@ namespace inst::ui {
                     if (!path.empty())
                         this->remoteFormProfile.path = path;
                 } else {
-                    mainApp->CreateShowDialog("Invalid Remote", "Host format is invalid.", {"common.ok"_lang}, true);
+                    mainApp->CreateShowDialog("Invalid Shop", "Host format is invalid.", {"common.ok"_lang}, true);
                 }
             }
         } else if (field == 3) {
-            const std::string value = TrimString(inst::util::numericKeyboard("Enter Remote port (1-65535)", std::to_string(this->remoteFormProfile.port), 5));
+            const std::string value = TrimString(inst::util::numericKeyboard("Enter Shop port (1-65535)", std::to_string(this->remoteFormProfile.port), 5));
             if (value.empty()) {
                 this->refreshRemoteForm();
                 return;
@@ -737,13 +737,13 @@ namespace inst::ui {
                 mainApp->CreateShowDialog("Invalid port", "Port must be between 1 and 65535.", {"common.ok"_lang}, true);
             }
         } else if (field == 4) {
-            this->remoteFormProfile.path = inst::config::NormalizeRemotePath(inst::util::softwareKeyboard("Enter Remote path (optional, e.g. /remote)", this->remoteFormProfile.path, 200));
+            this->remoteFormProfile.path = inst::config::NormalizeRemotePath(inst::util::softwareKeyboard("Enter Shop path (optional, e.g. /remote)", this->remoteFormProfile.path, 200));
         } else if (field == 5) {
             this->remoteFormProfile.username = inst::util::softwareKeyboard("options.remote.user_hint"_lang, this->remoteFormProfile.username, 100);
         } else if (field == 6) {
             this->remoteFormProfile.password = inst::util::softwareKeyboard("options.remote.pass_hint"_lang, this->remoteFormProfile.password, 100);
         } else if (field == 7) {
-            this->remoteFormProfile.title = TrimString(inst::util::softwareKeyboard("Enter Remote title (required)", this->remoteFormProfile.title, 80));
+            this->remoteFormProfile.title = TrimString(inst::util::softwareKeyboard("Enter Shop title (required)", this->remoteFormProfile.title, 80));
         } else if (field == 8) {
             this->remoteFormProfile.favourite = !this->remoteFormProfile.favourite;
         } else if (field == 9) {
@@ -755,12 +755,12 @@ namespace inst::ui {
 
     void optionsPage::saveRemoteForm() {
         if (this->remoteFormProfile.host.empty() || this->remoteFormProfile.title.empty()) {
-            mainApp->CreateShowDialog("Invalid Remote", this->remoteFormProfile.host.empty() ? "Host is required." : "Title is required.", {"common.ok"_lang}, true);
+            mainApp->CreateShowDialog("Invalid Shop", this->remoteFormProfile.host.empty() ? "Host is required." : "Title is required.", {"common.ok"_lang}, true);
             return;
         }
         std::string error;
         if (!inst::config::SaveRemote(this->remoteFormProfile, &error)) {
-            mainApp->CreateShowDialog("Failed to save Remote", error.empty() ? "Unknown error." : error, {"common.ok"_lang}, true);
+            mainApp->CreateShowDialog("Failed to save Shop", error.empty() ? "Unknown error." : error, {"common.ok"_lang}, true);
             return;
         }
         if (this->remoteFormWasActive)
@@ -773,8 +773,8 @@ namespace inst::ui {
         std::string favouriteLabel = remote.favourite ? "Unset favourite" : "Set favourite";
         const int action = inst::ui::mainApp->CreateShowDialog(
             remote.title,
-            "Choose an action for this Remote.",
-            {"Use this Remote", "Edit Remote", favouriteLabel, "Delete Remote", "Cancel"},
+            "Choose an action for this Shop.",
+            {"Use this Shop", "Edit Shop", favouriteLabel, "Delete Shop", "Cancel"},
             false
         );
 
@@ -788,12 +788,12 @@ namespace inst::ui {
             updated.favourite = !updated.favourite;
             std::string error;
             if (!inst::config::SaveRemote(updated, &error))
-                inst::ui::mainApp->CreateShowDialog("Failed to save Remote", error.empty() ? "Unknown error." : error, {"common.ok"_lang}, true);
+                inst::ui::mainApp->CreateShowDialog("Failed to save Shop", error.empty() ? "Unknown error." : error, {"common.ok"_lang}, true);
         } else if (action == 3) {
-            const int confirmDelete = inst::ui::mainApp->CreateShowDialog("Delete Remote?", "This cannot be undone.", {"Delete", "common.cancel"_lang}, false);
+            const int confirmDelete = inst::ui::mainApp->CreateShowDialog("Delete Shop?", "This cannot be undone.", {"Delete", "common.cancel"_lang}, false);
             if (confirmDelete == 0) {
                 if (!inst::config::DeleteRemote(remote.fileName)) {
-                    inst::ui::mainApp->CreateShowDialog("Failed to delete Remote", "Could not remove the Remote file.", {"common.ok"_lang}, true);
+                    inst::ui::mainApp->CreateShowDialog("Failed to delete Shop", "Could not remove the Shop file.", {"common.ok"_lang}, true);
                 } else if (IsActiveRemote(remote)) {
                     inst::config::remoteUrl.clear();
                     inst::config::remoteUser.clear();
@@ -1151,11 +1151,11 @@ namespace inst::ui {
                 case 9: {
                     std::vector<inst::config::RemoteProfile> remotes = inst::config::LoadRemotes();
                     if (remotes.empty()) {
-                        inst::ui::mainApp->CreateShowDialog("Active Remote", "No memorized Remotes found. Add one first.", {"common.ok"_lang}, true);
+                        inst::ui::mainApp->CreateShowDialog("Active Shop", "No memorized Shops found. Add one first.", {"common.ok"_lang}, true);
                         break;
                     }
                     std::vector<std::string> choices = BuildRemoteChoices(remotes);
-                    int selectedRemote = inst::ui::mainApp->CreateShowDialog("Active Remote", "Choose which memorized Remote to use.", choices, false);
+                    int selectedRemote = inst::ui::mainApp->CreateShowDialog("Active Shop", "Choose which memorized Shop to use.", choices, false);
                     if (selectedRemote < 0 || selectedRemote >= static_cast<int>(remotes.size()))
                         break;
                     if (inst::config::SetActiveRemote(remotes[selectedRemote], true))
@@ -1165,7 +1165,7 @@ namespace inst::ui {
                 case 20: {
                     std::vector<inst::config::RemoteProfile> remotes = inst::config::LoadRemotes();
                     if (remotes.empty()) {
-                        inst::ui::mainApp->CreateShowDialog("Memorized Remotes", "No memorized Remotes found.", {"common.ok"_lang}, true);
+                        inst::ui::mainApp->CreateShowDialog("Memorized Shops", "No memorized Shops found.", {"common.ok"_lang}, true);
                         break;
                     }
                     this->openRemoteList();
@@ -1196,7 +1196,7 @@ namespace inst::ui {
                     const std::string currentLabel = profiles[currentIndex];
                     int profileChoice = inst::ui::mainApp->CreateShowDialog(
                         "User-Agent profile",
-                        "Used for file/media downloads. Remote API always uses CyberFoil.",
+                        "Used for file/media downloads. Shop API always uses CyberFoil.",
                         profiles,
                         false
                     );

@@ -621,7 +621,7 @@ namespace inst::ui {
         const int confirm = mainApp->CreateShowDialog(
             "main.menu.backup"_lang,
             "Upload all local saves to the server now?\n"
-            "Remote: " + inst::util::shortenString(remoteDisplayName, 86, false) + "\n"
+            "Shop: " + inst::util::shortenString(remoteDisplayName, 86, false) + "\n"
             "Saves to upload: " + std::to_string(localEntries.size()),
             {"Upload All", "common.cancel"_lang},
             false);

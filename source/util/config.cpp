@@ -139,7 +139,7 @@ namespace inst::config {
                     stem.push_back('_');
             }
             if (stem.empty())
-                stem = "Remote";
+                stem = "Shop";
             return stem;
         }
 

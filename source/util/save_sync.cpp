@@ -770,7 +770,7 @@ namespace {
                 error = "Server does not provide save sync endpoints.";
             } else {
                 std::ostringstream ss;
-                ss << "Remote save list request returned HTTP " << outCode << ".";
+                ss << "Shop save list request returned HTTP " << outCode << ".";
                 error = ss.str();
             }
             return false;
@@ -921,7 +921,7 @@ namespace {
             if (responseCode == 401 || responseCode == 403) {
                 error = "Save download is not permitted for this account (backup access required).";
             } else if (responseCode == 404) {
-                error = "Remote save backup was not found.";
+                error = "Shop save backup was not found.";
             } else {
                 std::ostringstream ss;
                 ss << "Save download failed with HTTP " << responseCode;
@@ -1409,7 +1409,7 @@ namespace inst::save_sync {
 
         const std::string uploadUrl = BuildUploadUrl(remoteUrl, entry.titleId);
         if (uploadUrl.empty()) {
-            error = "Remote URL is not configured.";
+            error = "Shop URL is not configured.";
             return false;
         }
 
@@ -1565,7 +1565,7 @@ namespace inst::save_sync {
             if (responseCode == 401 || responseCode == 403) {
                 error = "Save delete is not permitted for this account (backup access required).";
             } else if (responseCode == 404) {
-                error = "Remote save backup was not found.";
+                error = "Shop save backup was not found.";
             } else {
                 std::ostringstream ss;
                 ss << "Save delete failed with HTTP " << responseCode;

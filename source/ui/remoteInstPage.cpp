@@ -970,7 +970,7 @@ namespace inst::ui {
         this->loadingProgressText->SetVisible(false);
         this->loadingBarBack = Rectangle::New(260, 540, 760, 14, COLOR("#FFFFFF33"));
         this->loadingBarBack->SetVisible(false);
-        this->loadingBarFill = Rectangle::New(260, 540, 0, 14, COLOR("#34C759FF"));
+        this->loadingBarFill = Rectangle::New(260, 540, 0, 14, COLOR("#7B61FFFF"));
         this->loadingBarFill->SetVisible(false);
         this->loadingStagesBack = Rectangle::New(220, 208, 840, 276, inst::config::oledMode ? COLOR("#101010CC") : COLOR("#141A2ECC"));
         this->loadingStagesBack->SetVisible(false);
@@ -1006,7 +1006,7 @@ namespace inst::ui {
             img->SetVisible(false);
             this->gridImages.push_back(img);
         }
-        auto selectedColor = COLOR("#34C75966");
+        auto selectedColor = COLOR("#7B61FF66");
         this->remoteGridSelectHighlights.reserve(kGridItemsPerPage);
         for (int i = 0; i < kGridItemsPerPage; i++) {
             auto highlight = Rectangle::New(0, 0, kGridTileWidth + 8, kGridTileHeight + 8, selectedColor);
@@ -1452,7 +1452,7 @@ namespace inst::ui {
     void remoteInstPage::refreshLoadingStagesText()
     {
         static const char* kLoadingStages[] = {
-            "Connect to Remote",
+            "Connect to Shop",
             "Fetch Catalog",
             "Parse Response",
             "Build Sections",
@@ -1496,14 +1496,14 @@ namespace inst::ui {
 
     int remoteInstPage::mapLoadingStageToIndex(const std::string& stage) const
     {
-        if (stage.find("Preparing Remote") != std::string::npos)
+        if (stage.find("Preparing Shop") != std::string::npos)
             return 0;
-        if (stage.find("Fetching Remote list") != std::string::npos
+        if (stage.find("Fetching Shop list") != std::string::npos
             || stage.find("Finishing catalog transfer") != std::string::npos)
             return 1;
-        if (stage.find("Parsing Remote response") != std::string::npos)
+        if (stage.find("Parsing Shop response") != std::string::npos)
             return 2;
-        if (stage.find("Scanning Remote sections") != std::string::npos
+        if (stage.find("Scanning Shop sections") != std::string::npos
             || stage.find("Preparing sections") != std::string::npos
             || stage.find("Preparing updates section") != std::string::npos
             || stage.find("Preparing DLC section") != std::string::npos
@@ -1517,8 +1517,8 @@ namespace inst::ui {
         if (stage.find("Preparing save sync") != std::string::npos
             || stage.find("Loading save sync list") != std::string::npos)
             return 5;
-        if (stage.find("Finalizing Remote") != std::string::npos
-            || stage.find("Remote ready") != std::string::npos)
+        if (stage.find("Finalizing Shop") != std::string::npos
+            || stage.find("Shop ready") != std::string::npos)
             return 6;
         return -1;
     }
@@ -1568,7 +1568,7 @@ namespace inst::ui {
             case BrowseSortMode::NameAsc:
                 return "Name";
             default:
-                return "Remote Order";
+                return "Shop Order";
         }
     }
 
@@ -1631,12 +1631,12 @@ namespace inst::ui {
             options = {
                 inst::config::remoteLegacyMode ? "Sort by Release Date" : "Sort by Date",
                 "Sort by Name",
-                "Use Remote Order"
+                "Use Shop Order"
             };
         }
         options.push_back("common.cancel"_lang);
 
-        const int choice = mainApp->CreateShowDialog("Sort Remote", details, options, false);
+        const int choice = mainApp->CreateShowDialog("Sort Shop", details, options, false);
         if (choice < 0)
             return;
 
@@ -1716,7 +1716,7 @@ namespace inst::ui {
     {
         const std::string normalizedName = OverflowText::NormalizeSingleLineText(item.name);
         if (item.isCheat) {
-            std::string suffix = inst::cheats::IsInstalled(item.cheatTitleId, item.cheatBuildId) ? " [Installed]" : " [Remote]";
+            std::string suffix = inst::cheats::IsInstalled(item.cheatTitleId, item.cheatBuildId) ? " [Installed]" : " [Shop]";
             return inst::util::shortenString(normalizedName, ComputeListNameLimit(suffix), true) + suffix;
         }
         std::string sizeText = FormatSizeText(item.size);
@@ -3788,7 +3788,7 @@ namespace inst::ui {
         this->pageInfoText->SetVisible(false);
         this->infoImage->SetX((1280 - this->infoImage->GetWidth()) / 2);
         this->infoImage->SetY(86);
-        this->setLoadingProgressStage("Preparing Remote...");
+        this->setLoadingProgressStage("Preparing Shop...");
         this->setLoadingProgress(0, true);
         mainApp->LoadLayout(mainApp->remoteinstPage);
         mainApp->CallForRender();
@@ -3826,7 +3826,7 @@ namespace inst::ui {
             this->setLoadingProgress(loadingPercent, true);
             mainApp->CallForRender();
         };
-        this->setLoadingProgressStage("Fetching Remote list...");
+        this->setLoadingProgressStage("Fetching Shop list...");
         this->setLoadingProgress(loadingPercent, true);
         mainApp->CallForRender();
 
@@ -3872,7 +3872,7 @@ namespace inst::ui {
                 const std::uint64_t total = fetchTotal.load(std::memory_order_relaxed);
 
                 int mappedPercent = loadingPercent;
-                const char* stageLabel = "Fetching Remote list...";
+                const char* stageLabel = "Fetching Shop list...";
                 if (total > 0) {
                     int fetchPercent = static_cast<int>((downloaded * 100ULL) / total);
                     if (fetchPercent > 100)
@@ -3940,7 +3940,7 @@ namespace inst::ui {
                 this->catalogCacheSections = this->remoteSections;
             }
         }
-        updateLoadingProgress(90, "Parsing Remote response...");
+        updateLoadingProgress(90, "Parsing Shop response...");
         this->saveSyncEnabled = !usedLegacyFallback && !inst::config::remoteLegacyMode;
         RemoteDlcTrace("FetchRemoteSections done sections=%llu errorLen=%llu", static_cast<unsigned long long>(this->remoteSections.size()), static_cast<unsigned long long>(error.size()));
         RemoteDlcTrace(
@@ -3968,7 +3968,7 @@ namespace inst::ui {
             mainApp->LoadLayout(mainApp->mainPage);
             return;
         }
-        updateLoadingProgress(91, "Scanning Remote sections...");
+        updateLoadingProgress(91, "Scanning Shop sections...");
 
         for (std::size_t i = 0; i < this->remoteSections.size(); i++) {
             const auto& section = this->remoteSections[i];
@@ -4082,8 +4082,8 @@ namespace inst::ui {
                 this->remoteSections.push_back(std::move(saveSection));
             }
         }
-        updateLoadingProgress(99, "Finalizing Remote...");
-        this->setLoadingProgressStage("Remote ready");
+        updateLoadingProgress(99, "Finalizing Shop...");
+        this->setLoadingProgressStage("Shop ready");
         this->setLoadingProgress(100, true);
         mainApp->CallForRender();
 
@@ -5006,7 +5006,7 @@ namespace inst::ui {
                     allCheats.push_back(candidate);
             }
         }
-        if (allCheats.empty()) { mainApp->CreateShowDialog("Cheats", "No valid cheats are available from this Remote.", {"common.ok"_lang}, true); return; }
+        if (allCheats.empty()) { mainApp->CreateShowDialog("Cheats", "No valid cheats are available from this Shop.", {"common.ok"_lang}, true); return; }
         if (mainApp->CreateShowDialog("Install all cheats?", "Install " + std::to_string(allCheats.size()) + " available cheat file(s) for all titles?", {"common.yes"_lang, "common.no"_lang}, false) != 0)
             return;
 

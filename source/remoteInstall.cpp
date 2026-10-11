@@ -427,7 +427,7 @@ namespace {
         }
 
         if (body.size() < kLegacyHeaderSize) {
-            outError = "Encrypted Remote response is truncated.";
+            outError = "Encrypted Shop response is truncated.";
             return false;
         }
 
@@ -440,12 +440,12 @@ namespace {
 
         if (encrypted) {
 #if !HAVE_LIB_BLOB
-            outError = "This build was made without prebuilt/lib.a; encrypted Remote responses are not supported.";
+            outError = "This build was made without prebuilt/lib.a; encrypted Shop responses are not supported.";
             return false;
 #else
             std::vector<std::uint8_t> aesKey;
             if (!TryUnwrapLegacyAesKey(reinterpret_cast<const std::uint8_t*>(body.data() + 0x8), aesKey)) {
-                outError = "Encrypted Remote response could not be decrypted.";
+                outError = "Encrypted Shop response could not be decrypted.";
                 return false;
             }
 
@@ -455,14 +455,14 @@ namespace {
                 mbedtls_aes_free(&aesCtx);
                 if (!aesKey.empty())
                     inst::util::SecureWipe(aesKey.data(), aesKey.size());
-                outError = "Failed to initialize AES decryption for encrypted Remote response.";
+                outError = "Failed to initialize AES decryption for encrypted Shop response.";
                 return false;
             }
             if ((payload.size() % 16) != 0) {
                 mbedtls_aes_free(&aesCtx);
                 if (!aesKey.empty())
                     inst::util::SecureWipe(aesKey.data(), aesKey.size());
-                outError = "Encrypted Remote payload is not AES block aligned.";
+                outError = "Encrypted Shop payload is not AES block aligned.";
                 return false;
             }
             for (std::size_t off = 0; off < payload.size(); off += 16)
@@ -511,7 +511,7 @@ namespace {
                 }
             }
             if (!ok) {
-                outError = "Failed to decompress zlib-compressed Remote payload.";
+                outError = "Failed to decompress zlib-compressed Shop payload.";
                 return false;
             }
         } else if (compression == kLegacyCompressionZstd) {
@@ -523,11 +523,11 @@ namespace {
                 }
             }
             if (!ok) {
-                outError = "Failed to decompress zstd-compressed Remote payload.";
+                outError = "Failed to decompress zstd-compressed Shop payload.";
                 return false;
             }
         } else {
-            outError = "Unsupported compressed Remote payload format.";
+            outError = "Unsupported compressed Shop payload format.";
             return false;
         }
 
@@ -1185,7 +1185,7 @@ namespace {
         try {
             nlohmann::json remote = nlohmann::json::parse(body);
             if (remote.contains("error") && remote["error"].is_string()) {
-                error = "Remote login failed. " + remote["error"].get<std::string>();
+                error = "Shop login failed. " + remote["error"].get<std::string>();
                 return sections;
             }
             std::string googleApiKey;
@@ -1195,9 +1195,9 @@ namespace {
                 std::string lower = body;
                 std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
                 if (lower.find("unauthorized") != std::string::npos || lower.find("login") != std::string::npos) {
-                    error = "Remote login failed. Check username/password or enable public Remote.";
+                    error = "Shop login failed. Check username/password or enable public Shop.";
                 } else {
-                    error = "Remote response missing sections.";
+                    error = "Shop response missing sections.";
                 }
                 return sections;
             }
@@ -1369,7 +1369,7 @@ namespace {
             }
         }
         catch (...) {
-            error = "Invalid Remote response.";
+            error = "Invalid Shop response.";
             return {};
         }
 
@@ -1570,9 +1570,9 @@ namespace remoteInstStuff {
         }
         if (fetch.responseCode == 401 || fetch.responseCode == 403) {
             if (!inst::util::HasLegacyAuthSupport()) {
-                error = "Remote requires legacy HAUTH/UAUTH signing, but this build does not support it.";
+                error = "This shop only accepts the official Tinfoil app (HAUTH signing), so ShopNX can't open it.";
             } else {
-                error = "Remote requires authentication. Check credentials or enable public Remote.";
+                error = "Shop requires authentication. Check credentials or enable public Shop.";
             }
             return false;
         }
@@ -1582,14 +1582,14 @@ namespace remoteInstStuff {
         }
         std::size_t legacyOffset = std::string::npos;
         if (FindLegacyPayloadOffset(fetch.body, legacyOffset)) {
-            error = "Encrypted Remote response could not be decoded.";
+            error = "Encrypted Shop response could not be decoded.";
             return false;
         }
         if (IsLoginUrl(fetch.effectiveUrl.c_str()) || (!fetch.contentType.empty() && fetch.contentType.find("text/html") != std::string::npos) || ContainsHtml(fetch.body)) {
             if (inst::config::remoteLegacyMode && !inst::util::HasLegacyAuthSupport()) {
-                error = "This build does not support this Remote";
+                error = "This build does not support this Shop";
             } else {
-                error = "Remote returned the login page. Check Remote URL, username, and password, or enable public Remote.";
+                error = "Shop returned the login page. Check Shop URL, username, and password, or enable public Shop.";
             }
             return false;
         }
@@ -2064,7 +2064,7 @@ namespace remoteInstStuff {
             const std::string& credentialOrigin = "", const std::vector<std::string>& inheritedRequestHeaders = {})
         {
             if (!remote.is_object()) {
-                error = "Invalid Remote response.";
+                error = "Invalid Shop response.";
                 return false;
             }
             if (!ValidateCustomIndexOptions(remote, error))
@@ -2162,7 +2162,7 @@ namespace remoteInstStuff {
                     try {
                         directoryJson = nlohmann::json::parse(directoryFetch.body);
                     } catch (...) {
-                        error = "Invalid Remote response.";
+                        error = "Invalid Shop response.";
                         return false;
                     }
 
@@ -2173,7 +2173,7 @@ namespace remoteInstStuff {
             }
 
             if (!handled) {
-                error = "Remote response missing file list.";
+                error = "Shop response missing file list.";
                 return false;
             }
 
@@ -2246,7 +2246,7 @@ namespace remoteInstStuff {
 
         std::string baseUrl = NormalizeRemoteUrl(remoteUrl);
         if (baseUrl.empty()) {
-            error = "Remote URL is empty.";
+            error = "Shop URL is empty.";
             return items;
         }
 
@@ -2280,7 +2280,7 @@ namespace remoteInstStuff {
                 return items;
         }
         catch (...) {
-            error = "Invalid Remote response.";
+            error = "Invalid Shop response.";
             return {};
         }
 
@@ -2299,7 +2299,7 @@ namespace remoteInstStuff {
 
         std::string baseUrl = NormalizeRemoteUrl(remoteUrl);
         if (baseUrl.empty()) {
-            error = "Remote URL is empty.";
+            error = "Shop URL is empty.";
             return sections;
         }
 
@@ -2389,7 +2389,7 @@ namespace remoteInstStuff {
         if (user.empty() && pass.empty()) { error = "Cheat upload requires authenticated AeroFoil admin credentials."; return false; }
         if (!inst::cheats::IsValidTitleId(titleId) || !inst::cheats::IsValidBuildId(buildId)) { error = "Invalid title ID or build ID."; return false; }
         const std::string baseUrl = NormalizeRemoteUrl(remoteUrl);
-        if (baseUrl.empty()) { error = "Remote URL is empty."; return false; }
+        if (baseUrl.empty()) { error = "Shop URL is empty."; return false; }
         const std::string url = BuildFullUrl(baseUrl, "/api/cheats");
         CURL* curl = curl_easy_init();
         if (!curl) { error = "Failed to initialize curl."; return false; }
@@ -2419,7 +2419,7 @@ namespace remoteInstStuff {
         if (headerList) curl_slist_free_all(headerList);
         curl_mime_free(mime); curl_easy_cleanup(curl);
         if (rc != CURLE_OK) { error = curl_easy_strerror(rc); return false; }
-        if (responseCode == 401 || responseCode == 403) { error = "AeroFoil rejected the upload: this Remote account is not an admin."; return false; }
+        if (responseCode == 401 || responseCode == 403) { error = "AeroFoil rejected the upload: this Shop account is not an admin."; return false; }
         if (responseCode == 404 || responseCode == 405) { error = "This AeroFoil server does not support cheat uploads."; return false; }
         if (responseCode < 200 || responseCode >= 300) { error = "Cheat upload failed (HTTP " + std::to_string(responseCode) + ")."; return false; }
         try { const auto body = nlohmann::json::parse(response); if (body.contains("success") && body["success"].is_boolean() && !body["success"].get<bool>()) { error = body.value("error", "AeroFoil rejected the upload."); return false; } } catch (...) { /* Some AeroFoil versions return an empty success body. */ }
