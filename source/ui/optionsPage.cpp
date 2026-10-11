@@ -705,7 +705,7 @@ namespace inst::ui {
             return;
         }
         if (field == 2) {
-            const std::string endpoint = TrimString(inst::util::softwareKeyboard("Enter Shop host or IP", this->remoteFormProfile.host, 200));
+            const std::string endpoint = TrimString(inst::util::softwareKeyboard("Enter shop URL, host or IP", this->remoteFormProfile.host, 200));
             if (!endpoint.empty()) {
                 const bool hasScheme = endpoint.rfind("http://", 0) == 0 || endpoint.rfind("https://", 0) == 0;
                 const std::string rawEndpoint = hasScheme ? endpoint : (this->remoteFormProfile.protocol + "://" + endpoint);
@@ -714,10 +714,22 @@ namespace inst::ui {
                 if (inst::config::ParseRemoteUrl(rawEndpoint, protocol, host, port, path) && !host.empty()) {
                     this->remoteFormProfile.protocol = protocol;
                     this->remoteFormProfile.host = host;
-                    if (RemoteInputHasExplicitPort(endpoint))
+                    // A pasted full URL means its own port, or the scheme's default (443/80).
+                    if (hasScheme || RemoteInputHasExplicitPort(endpoint))
                         this->remoteFormProfile.port = port;
                     if (!path.empty())
                         this->remoteFormProfile.path = path;
+                    // DBI/Tinfoil-style links often carry the login: https://user:pass@host/path
+                    const std::size_t authStart = hasScheme ? endpoint.find("://") + 3 : 0;
+                    const std::string authority = endpoint.substr(authStart, endpoint.find_first_of("/?#", authStart) - authStart);
+                    const std::size_t at = authority.rfind('@');
+                    if (at != std::string::npos) {
+                        const std::string userInfo = authority.substr(0, at);
+                        const std::size_t colon = userInfo.find(':');
+                        this->remoteFormProfile.username = userInfo.substr(0, colon);
+                        if (colon != std::string::npos)
+                            this->remoteFormProfile.password = userInfo.substr(colon + 1);
+                    }
                 } else {
                     mainApp->CreateShowDialog("Invalid Shop", "Host format is invalid.", {"common.ok"_lang}, true);
                 }

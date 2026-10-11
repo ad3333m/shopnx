@@ -57,7 +57,7 @@ namespace inst::config {
         std::string protocol;
         std::string host;
         std::string path;
-        int port = 8465;
+        int port = 80;
         std::string username;
         std::string password;
         std::string title;

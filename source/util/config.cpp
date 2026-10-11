@@ -68,7 +68,7 @@ namespace inst::config {
 
         int DefaultPortForNormalizedProtocol(const std::string& normalizedProtocol)
         {
-            return normalizedProtocol == "https" ? 443 : 8465;
+            return normalizedProtocol == "https" ? 443 : 80;
         }
 
         bool EnsureRemotesDirectory()
@@ -619,7 +619,9 @@ namespace inst::config {
         if (port <= 0 || port > 65535)
             port = DefaultPortForNormalizedProtocol(protocol);
 
-        return protocol + "://" + host + ":" + std::to_string(port) + path;
+        // Leave default ports out so absolute links in a folder listing match the shop URL.
+        const bool defaultPort = port == DefaultPortForNormalizedProtocol(protocol);
+        return protocol + "://" + host + (defaultPort ? "" : ":" + std::to_string(port)) + path;
     }
 
     std::vector<RemoteProfile> LoadRemotes()
