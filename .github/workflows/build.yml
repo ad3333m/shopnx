@@ -51,6 +51,4 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           name: ShopNX ${{ env.VERSION }}
-          files: |
-            ShopNX.zip
-            shopnx.nro
+          files: ShopNX.zip # only asset: the updater unzips assets[0]
