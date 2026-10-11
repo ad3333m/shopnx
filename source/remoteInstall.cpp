@@ -6,6 +6,7 @@
 #include <curl/curl.h>
 #include <filesystem>
 #include <limits>
+#include <regex>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -2180,6 +2181,64 @@ namespace remoteInstStuff {
         }
     }
 
+    namespace {
+        bool IsInstallableName(std::string name)
+        {
+            std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return std::tolower(c); });
+            for (const char* ext : {".nsp", ".nsz", ".xci", ".xcz"}) {
+                if (name.size() > 4 && name.compare(name.size() - 4, 4, ext) == 0)
+                    return true;
+            }
+            return false;
+        }
+
+        // DBI-style shops are plain Apache/nginx/lighttpd directory listings: follow <a href> links to
+        // installable files and down into sub-folders of the listing.
+        void CollectItemsFromHtmlListing(const std::string& body, const std::string& pageUrl, const std::string& user,
+            const std::string& pass, std::vector<RemoteItem>& items, std::unordered_set<std::string>& seenItemUrls,
+            std::unordered_set<std::string>& seenManifestUrls, const RemoteFetchProgressCallback& progressCb, int depth)
+        {
+            std::string dirUrl = pageUrl.substr(0, pageUrl.find_first_of("?#"));
+            dirUrl = dirUrl.substr(0, dirUrl.rfind('/') + 1);
+            const std::string origin = GetUrlOrigin(dirUrl);
+            static const std::regex hrefRegex("href\\s*=\\s*[\"']([^\"']+)[\"']", std::regex::icase);
+
+            for (std::sregex_iterator it(body.begin(), body.end(), hrefRegex), end; it != end; ++it) {
+                std::string href = (*it)[1].str();
+                for (std::size_t amp; (amp = href.find("&amp;")) != std::string::npos;)
+                    href.replace(amp, 5, "&");
+                href = href.substr(0, href.find_first_of("?#"));
+                if (href.empty() || href.rfind("..", 0) == 0)
+                    continue;
+
+                std::string url;
+                if (href.find("://") != std::string::npos)
+                    url = href;
+                else if (href[0] == '/')
+                    url = origin + href;
+                else
+                    url = dirUrl + href;
+
+                if (url.back() == '/') {
+                    // ponytail: depth cap 4, enough for console/genre/title layouts
+                    if (depth < 4 && url.size() > dirUrl.size() && url.rfind(dirUrl, 0) == 0 && seenManifestUrls.insert(url).second) {
+                        FetchResult sub = FetchRemoteResponse(url, user, pass, progressCb);
+                        if (sub.error.empty() && sub.responseCode < 400)
+                            CollectItemsFromHtmlListing(sub.body, sub.effectiveUrl.empty() ? url : sub.effectiveUrl,
+                                user, pass, items, seenItemUrls, seenManifestUrls, progressCb, depth + 1);
+                    }
+                    continue;
+                }
+
+                const std::string name = DecodeUrlSegment(url.substr(url.rfind('/') + 1));
+                if (!IsInstallableName(name))
+                    continue;
+                std::string ignored;
+                AppendRemoteItemFromEntry(nlohmann::json{{"name", name}, {"url", url}}, dirUrl, "", {}, items, seenItemUrls, ignored);
+            }
+        }
+    }
+
     std::vector<RemoteItem> FetchRemote(const std::string& remoteUrl, const std::string& user, const std::string& pass, std::string& error, const RemoteFetchProgressCallback& progressCb)
     {
         std::vector<RemoteItem> items;
@@ -2192,6 +2251,22 @@ namespace remoteInstStuff {
         }
 
         FetchResult fetch = FetchRemoteResponse(baseUrl, user, pass, progressCb);
+        // A directory listing (DBI shop) is HTML; a login page is too, so only accept it when it links to files.
+        if (fetch.error.empty() && fetch.responseCode < 400 && ContainsHtml(fetch.body)) {
+            std::unordered_set<std::string> seenItemUrls;
+            std::unordered_set<std::string> seenManifestUrls{baseUrl};
+            std::string pageUrl = fetch.effectiveUrl.empty() ? baseUrl : fetch.effectiveUrl;
+            if (pageUrl.back() != '/' && pageUrl.substr(pageUrl.rfind('/') + 1).find('.') == std::string::npos)
+                pageUrl += "/"; // ".../shop" is a folder, ".../shop/index.html" is not
+            CollectItemsFromHtmlListing(fetch.body, pageUrl, user, pass,
+                items, seenItemUrls, seenManifestUrls, progressCb, 0);
+            if (!items.empty()) {
+                std::sort(items.begin(), items.end(), [](const RemoteItem& a, const RemoteItem& b) {
+                    return inst::util::ignoreCaseCompare(a.name, b.name);
+                });
+                return items;
+            }
+        }
         if (!ValidateRemoteResponse(fetch, error))
             return items;
 

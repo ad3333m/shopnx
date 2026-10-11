@@ -4,7 +4,7 @@
             "sd": "Install from SD card",
             "hdd": "Install from USB SSD/HDD",
             "net": "Install over LAN or internet",
-            "remote": "Install from Remote",
+            "remote": "Shops",
             "usb": "Install from NS-USBloader",
             "mtp": "Install over MTP",
             "backup": "Backup Save Data",
@@ -19,7 +19,7 @@
         "usb": {
             "warn": {
                 "title": "Warning!",
-                "desc": "USB installations may not \"just werk\" on some devices and setups.\nIf you experience issues with USB installations, please don't pull your\nhair out! It's advised to use NS-USBloader for USB installations, or\nLAN/Internet installations instead for remote installation, especially\nwhen paired with an ethernet adapter!\n\nYou have been warned...",
+                "desc": "USB installations may not \"just werk\" on some devices and setups.\nIf you experience issues with USB installations, please don't pull your\nhair out! It's advised to use NS-USBloader for USB installations, or\nLAN/Internet installations instead for shop installation, especially\nwhen paired with an ethernet adapter!\n\nYou have been warned...",
                 "opt1": "Don't tell me again"
             },
             "error": {
@@ -33,28 +33,28 @@
         },
         "applet": {
             "title": "Applet Mode not supported",
-            "desc": "You may experience issues using CyberFoil in Applet Mode. If you do\nhave problems, please switch to running CyberFoil over an installed\ntitle (hold R while starting a game)!"
+            "desc": "You may experience issues using ShopNX in Applet Mode. If you do\nhave problems, please switch to running ShopNX over an installed\ntitle (hold R while starting a game)!"
         },
         "buttons": " Select     Exit",
         "info": {
             "button": "Info",
-            "remote": "Browse Remote sections and select titles to install from your Remote.",
+            "remote": "Browse Shop sections and select titles to install from your Shop.",
             "sd": "Install NSP/NSZ/XCI/XCZ files stored on your SD card.",
             "hdd": "Install files directly from a connected USB SSD or hard drive.",
             "mtp": "Connect a PC over USB and install by copying files to the MTP install folder.",
             "usb": "Install over USB from tools like NS-USBloader.",
             "net": "Install files from LAN or internet sources.",
             "sig": "Install, update, or remove signature patches.",
-            "set": "Change CyberFoil preferences and Remote settings.",
-            "backup": "Uploads all local save data for the selected user to your configured Remote server in one action.\n\nHow it works:\n1. If multiple users exist, choose which account to back up.\n2. If no Remote is configured, CyberFoil tries saved Remote profiles first, then asks for a Remote URL.\n3. Enter a backup note (required).\n4. CyberFoil scans that user's local saves and uploads each one to the server.\n5. Progress is shown during scan and upload.\n6. A final summary reports uploaded and failed saves.",
-            "exit": "Close CyberFoil and return to HOME."
+            "set": "Change ShopNX preferences and Shop settings.",
+            "backup": "Uploads all local save data for the selected user to your configured Shop server in one action.\n\nHow it works:\n1. If multiple users exist, choose which account to back up.\n2. If no Shop is configured, ShopNX tries saved Shop profiles first, then asks for a Shop URL.\n3. Enter a backup note (required).\n4. ShopNX scans that user's local saves and uploads each one to the server.\n5. Progress is shown during scan and upload.\n6. A final summary reports uploaded and failed saves.",
+            "exit": "Close ShopNX and return to HOME."
         }
     },
     "inst": {
         "net": {
             "help": {
                 "title": "Help",
-                "desc": "Files can be installed remotely from your other devices using tools such\nas NS-USBloader in Tinfoil mode. To send files to your Switch, open one\nof these pieces of software on your PC or mobile device, input your\nSwitch's IP address (listed on-screen), select your files, then upload\nto your console! If the software you're using won't let you select\nspecific file types, try renaming the extension to something it accepts.\nCyberFoil doesn't care about file extensions during net installations!\n\nIf you can't figure it out, just copy your files to your SD card and try\nthe \"Install from SD Card\" option on the main menu!"
+                "desc": "Files can be installed remotely from your other devices using tools such\nas NS-USBloader in Tinfoil mode. To send files to your Switch, open one\nof these pieces of software on your PC or mobile device, input your\nSwitch's IP address (listed on-screen), select your files, then upload\nto your console! If the software you're using won't let you select\nspecific file types, try renaming the extension to something it accepts.\nShopNX doesn't care about file extensions during net installations!\n\nIf you can't figure it out, just copy your files to your SD card and try\nthe \"Install from SD Card\" option on the main menu!"
             },
             "src": {
                 "title": "Where do you want to install from?",
@@ -73,7 +73,7 @@
             },
             "top_info": "Select what files you want to install from the server, then press the Plus button!",
             "top_info1": "Waiting for a connection... Your Switch's IP Address is: ",
-            "failed": "Failed to perform remote install!",
+            "failed": "Failed to perform shop install!",
             "transfer_interput": "An error occured during data transfer. Check your network connection.",
             "retry": {
                 "title": "Download failed",
@@ -86,13 +86,13 @@
             "buttons1": " Select File     Select All     Install File(s)     Cancel"
         },
         "remote": {
-            "loading": "Loading Remote list...",
-            "top_info": "Select what files you want to install from Remote, then press the Plus button! Section:",
-            "failed": "Failed to load Remote",
-            "unreachable": "Cannot reach Remote.",
-            "encrypted_unsupported": "Encrypted Remote responses are not supported. Disable Encrypt Remote in Remote settings.",
-            "empty": "Remote has no files.",
-            "source_string": " from Remote",
+            "loading": "Loading Shop list...",
+            "top_info": "Select what files you want to install from Shop, then press the Plus button! Section:",
+            "failed": "Failed to load Shop",
+            "unreachable": "Cannot reach Shop.",
+            "encrypted_unsupported": "Encrypted Shop responses are not supported. Disable Encrypt Shop in Shop settings.",
+            "empty": "Shop has no files.",
+            "source_string": " from Shop",
             "buttons_loading": " Cancel",
             "buttons": " Select File     Select All     Install File(s)     Refresh    / Section     View     Cancel",
             "buttons_all": " Select File     Select All     Install File(s)     Refresh    / Section     Search     View     Cancel",
@@ -137,7 +137,7 @@
                     "replace_local_prompt": "Replace local save data with the server copy?",
                     "delete_selected_fmt": "Delete selected server backup?",
                     "delete_fmt": "Delete server backup?",
-                    "none_available": "No local or remote save is available for this title.",
+                    "none_available": "No local or shop save is available for this title.",
                     "success_generic": "Save sync completed successfully.",
                     "uploaded_success": "Save uploaded successfully.",
                     "downloaded_success": "Save downloaded successfully.",
@@ -217,7 +217,7 @@
         },
         "nca_verify": {
             "title": "Invalid NCA signature detected!",
-            "desc": "Improperly signed software should only be installed from trustworthy\nsources. Files containing cartridge repacks and DLC unlockers will always\nshow this warning. You can disable this check in CyberFoil's settings.\n\nAre you sure you want to continue the installation?",
+            "desc": "Improperly signed software should only be installed from trustworthy\nsources. Files containing cartridge repacks and DLC unlockers will always\nshow this warning. You can disable this check in ShopNX's settings.\n\nAre you sure you want to continue the installation?",
             "opt1": "Yes, I understand the risks",
             "error": "The requested NCA is not properly signed: "
         },
@@ -241,7 +241,7 @@
         "backup_failed": "Could not back up Hekate patches.ini! Install anyway?",
         "backup_failed_desc": "If you don't use Hekate you can ignore this warning.",
         "download_failed": "Could not download signature patches",
-        "download_failed_desc": "You may have supplied an invalid source in CyberFoil's settings,\nor the host may just be down right now.",
+        "download_failed_desc": "You may have supplied an invalid source in ShopNX's settings,\nor the host may just be down right now.",
         "version_text2": "Your signature patches have been updated for up to HOS version ",
         "install_complete": "Install complete!",
         "complete_desc": "Restart your console to apply",
@@ -260,19 +260,19 @@
             "nca_verify": "Verify NCA signatures before installation",
             "boost_mode": "Enable \"boost mode\" during installations",
             "ask_delete": "Ask to delete original files after installation",
-            "auto_update": "Check for updates to CyberFoil automatically",
+            "auto_update": "Check for updates to ShopNX automatically",
             "gay_option": "Remove anime",
             "sig_url": "Signature patches source URL: ",
-            "remote_url": "Remote URL: ",
-            "remote_user": "Remote username: ",
-            "remote_pass": "Remote password: ",
-            "remote_hide_installed": "Hide installed titles in Remote",
-            "remote_hide_installed_section": "Hide Installed section in Remote",
+            "remote_url": "Shop URL: ",
+            "remote_user": "Shop username: ",
+            "remote_pass": "Shop password: ",
+            "remote_hide_installed": "Hide installed titles in Shop",
+            "remote_hide_installed_section": "Hide Installed section in Shop",
             "remote_all_base_only": "Only show base titles in All section",
-            "remote_start_grid_mode": "Start Remote in grid mode",
-            "remote_reset_icons": "Reset Remote icon cache",
+            "remote_start_grid_mode": "Start Shop in grid mode",
+            "remote_reset_icons": "Reset Shop icon cache",
             "language": "Language: ",
-            "check_update": "Check for updates to CyberFoil",
+            "check_update": "Check for updates to ShopNX",
             "credits": "Credits",
             "sound": "Enable sounds",
             "oled": "Enable OLED mode",
@@ -285,39 +285,39 @@
         },
         "sig_hint": "Enter the URL to obtain Signature Patches from",
         "remote": {
-            "url_hint": "Enter your Remote URL (example: http://192.168.1.2:8465)",
-            "user_hint": "Enter your Remote username (optional)",
-            "pass_hint": "Enter your Remote password (optional)"
+            "url_hint": "Enter your Shop URL (example: http://192.168.1.2:8465)",
+            "user_hint": "Enter your Shop username (optional)",
+            "pass_hint": "Enter your Shop password (optional)"
         },
         "cache_reset": {
-            "title": "Reset Remote icon cache?",
-            "desc": "This will delete all cached Remote icons and force a re-download the next time you open Remote.",
+            "title": "Reset Shop icon cache?",
+            "desc": "This will delete all cached Shop icons and force a re-download the next time you open Shop.",
             "confirm": "Reset"
         },
         "update": {
             "title": "Update available",
-            "desc0": "CyberFoil ",
+            "desc0": "ShopNX ",
             "desc1": " is available now! Ready to update?",
             "opt0": "Update",
-            "top_info": "Updating to CyberFoil ",
-            "bot_info": "Downloading CyberFoil ",
-            "bot_info2": "Extracting CyberFoil ",
+            "top_info": "Updating to ShopNX ",
+            "bot_info": "Downloading ShopNX ",
+            "bot_info2": "Extracting ShopNX ",
             "complete": "Update complete!",
             "failed": "Update failed!",
             "end_desc": "The software will now be closed.",
             "title_check_fail": "No updates found",
-            "desc_check_fail": "You are on the latest version of CyberFoil!"
+            "desc_check_fail": "You are on the latest version of ShopNX!"
         },
         "credits": {
             "title": "Thanks to the following people!",
-            "desc": "- Huntereb for Awoo Installer\n- ITotalJustice for Sphaira\n- XorTroll for Plutonium\n- Atmosphere Team for libhaze\n- DarkMatterCore for libusbhsfs\n- The Homebrew community for all their hard work and dedication\n- You, for using CyberFoil!"
+            "desc": "- luketanti for CyberFoil, which ShopNX is built on\n- Huntereb for Awoo Installer\n- ITotalJustice for Sphaira\n- XorTroll for Plutonium\n- Atmosphere Team for libhaze\n- DarkMatterCore for libusbhsfs\n- The Homebrew community for all their hard work and dedication\n- You, for using ShopNX!"
         },
         "language": {
-            "title": "Select CyberFoil's language",
+            "title": "Select ShopNX's language",
             "desc": "The software will be closed after changing languages. Press B to cancel.",
             "system_language": "System"
         },
-        "title": "Change CyberFoil's settings!",
+        "title": "Change ShopNX's settings!",
         "buttons": " Select/Change     Cancel"
     },
     "common": {

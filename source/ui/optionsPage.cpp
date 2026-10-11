@@ -260,24 +260,24 @@ namespace inst::ui {
         if (inst::config::oledMode) {
             this->SetBackgroundColor(COLOR("#000000FF"));
         } else {
-            this->SetBackgroundColor(COLOR("#670000FF"));
+            this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
             else this->SetBackgroundImage("romfs:/images/background.jpg");
         }
-        const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#170909FF");
-        const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#17090980");
-        const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#17090980");
+        const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
+        const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
+        const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
         this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
         this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
-        this->sideNavRect = Rectangle::New(0, 136, 300, 523, inst::config::oledMode ? COLOR("#FFFFFF18") : COLOR("#170909A0"));
+        this->sideNavRect = Rectangle::New(0, 136, 300, 523, inst::config::oledMode ? COLOR("#FFFFFF18") : COLOR("#141A2EA0"));
         if (inst::config::gayMode) {
             this->titleImage = Image::New(-113, -8, "romfs:/images/logo.png");
             this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
-            this->appVersionText = TextBlock::New(480, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
         this->timeText = TextBlock::New(0, 18, "--:--", 22);
@@ -293,9 +293,9 @@ namespace inst::ui {
         this->sdFreeText = TextBlock::New(0, 42, "Free --", 16);
         this->sdFreeText->SetColor(COLOR("#FFFFFFFF"));
         this->sysBarBack = Rectangle::New(0, 30, 180, 6, COLOR("#FFFFFF33"));
-        this->sysBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#FF4D4DFF"));
+        this->sysBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#7B61FFFF"));
         this->sdBarBack = Rectangle::New(0, 30, 180, 6, COLOR("#FFFFFF33"));
-        this->sdBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#FF4D4DFF"));
+        this->sdBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#7B61FFFF"));
         this->netIndicator = Rectangle::New(0, 0, 6, 6, COLOR("#FF3B30FF"), 3);
         this->wifiBar1 = Rectangle::New(0, 0, 4, 4, COLOR("#FFFFFF55"));
         this->wifiBar2 = Rectangle::New(0, 0, 4, 7, COLOR("#FFFFFF55"));
@@ -315,7 +315,7 @@ namespace inst::ui {
             this->menu->SetScrollbarColor(COLOR("#FFFFFF66"));
         } else {
             this->menu->SetOnFocusColor(COLOR("#00000033"));
-            this->menu->SetScrollbarColor(COLOR("#17090980"));
+            this->menu->SetScrollbarColor(COLOR("#141A2E80"));
         }
         this->Add(this->topRect);
         this->Add(this->infoRect);
@@ -356,13 +356,13 @@ namespace inst::ui {
         this->Add(this->menu);
 
         this->remoteFormShade = Rectangle::New(0, 74, 1280, 586, COLOR("#00000088"));
-        this->remoteFormBorder = Rectangle::New(238, 80, 804, 574, inst::config::oledMode ? COLOR("#FFFFFF66") : COLOR("#170909FF"));
-        this->remoteFormPanel = Rectangle::New(241, 83, 798, 568, inst::config::oledMode ? COLOR("#000000FA") : COLOR("#170909FA"));
+        this->remoteFormBorder = Rectangle::New(238, 80, 804, 574, inst::config::oledMode ? COLOR("#FFFFFF66") : COLOR("#141A2EFF"));
+        this->remoteFormPanel = Rectangle::New(241, 83, 798, 568, inst::config::oledMode ? COLOR("#000000FA") : COLOR("#141A2EFA"));
         this->remoteFormTitle = TextBlock::New(270, 104, "Remote", 32);
         this->remoteFormHint = TextBlock::New(270, 614, " Edit/Select     Cancel", 20);
         this->remoteFormMenu = Menu::New(260, 140, 760, COLOR("#00000000"), 46, 10, 24);
         this->remoteFormMenu->SetOnFocusColor(inst::config::oledMode ? COLOR("#FFFFFF33") : COLOR("#00000070"));
-        this->remoteProtocolDropdownPanel = Rectangle::New(720, 146, 286, 108, inst::config::oledMode ? COLOR("#000000FF") : COLOR("#170909FF"));
+        this->remoteProtocolDropdownPanel = Rectangle::New(720, 146, 286, 108, inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF"));
         this->remoteProtocolDropdownMenu = Menu::New(728, 154, 270, COLOR("#00000000"), 46, 2, 25);
         this->remoteProtocolDropdownMenu->SetOnFocusColor(inst::config::oledMode ? COLOR("#FFFFFF33") : COLOR("#00000070"));
         this->remoteFormTitle->SetColor(COLOR("#FFFFFFFF"));
@@ -644,7 +644,7 @@ namespace inst::ui {
             return value.empty() ? emptyValue : inst::util::shortenString(value, 34, false);
         };
         const std::string protocol = this->remoteFormProfile.protocol == "https" ? "HTTPS" : "HTTP";
-        const std::string mode = this->remoteFormProfile.legacyMode ? "Legacy Mode (Tinfoil)" : "CyberFoil Mode";
+        const std::string mode = this->remoteFormProfile.legacyMode ? "Tinfoil / DBI Mode" : "CyberFoil Mode";
         const std::string path = this->remoteFormProfile.path.empty() ? "/" : this->remoteFormProfile.path;
         const std::string password = this->remoteFormProfile.password.empty() ? "Not set" : "Set";
         const std::string favourite = this->remoteFormProfile.favourite ? "Yes" : "No";
@@ -692,7 +692,7 @@ namespace inst::ui {
             this->remoteModeDropdownVisible = true;
             this->remoteProtocolDropdownMenu->ClearItems();
             auto cyberFoil = MenuItem::New("CyberFoil Mode");
-            auto legacy = MenuItem::New("Legacy Mode (Tinfoil)");
+            auto legacy = MenuItem::New("Tinfoil / DBI Mode");
             cyberFoil->SetColor(COLOR("#FFFFFFFF"));
             legacy->SetColor(COLOR("#FFFFFFFF"));
             this->remoteProtocolDropdownMenu->AddItem(cyberFoil);

@@ -1,0 +1,56 @@
+name: Build ShopNX
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build
+        shell: bash
+        run: |
+          set -euo pipefail
+          dkp-pacman -S --noconfirm --needed switch-ntfs-3g switch-lwext4
+          make -j"$(nproc)" RELEASE=1
+          echo "VERSION=$(sed -nE 's/^APP_VERSION\s*:=\s*//p' Makefile | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      # The in-app updater extracts the first release asset over sdmc:/
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/switch/ShopNX
+          cp shopnx.nro dist/switch/ShopNX/shopnx.nro
+          cd dist && python3 -c "import shutil; shutil.make_archive('../ShopNX', 'zip', '.', 'switch')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShopNX
+          path: |
+            shopnx.nro
+            ShopNX.zip
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ShopNX ${{ env.VERSION }}
+          files: |
+            ShopNX.zip
+            shopnx.nro

@@ -921,13 +921,13 @@ namespace inst::ui {
         if (inst::config::oledMode) {
             this->SetBackgroundColor(COLOR("#000000FF"));
         } else {
-            this->SetBackgroundColor(COLOR("#670000FF"));
+            this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
             else this->SetBackgroundImage("romfs:/images/background.jpg");
         }
-        const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#170909FF");
-        const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#17090980");
-        const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#17090980");
+        const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
+        const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
+        const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
         this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
         this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
@@ -937,7 +937,7 @@ namespace inst::ui {
         }
         else {
             this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
-            this->appVersionText = TextBlock::New(480, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
         this->timeText = TextBlock::New(0, 18, "--:--", 22);
@@ -953,9 +953,9 @@ namespace inst::ui {
         this->sdFreeText = TextBlock::New(0, 42, "Free --", 16);
         this->sdFreeText->SetColor(COLOR("#FFFFFFFF"));
         this->sysBarBack = Rectangle::New(0, 30, 180, 6, COLOR("#FFFFFF33"));
-        this->sysBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#FF4D4DFF"));
+        this->sysBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#7B61FFFF"));
         this->sdBarBack = Rectangle::New(0, 30, 180, 6, COLOR("#FFFFFF33"));
-        this->sdBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#FF4D4DFF"));
+        this->sdBarFill = Rectangle::New(0, 30, 0, 6, COLOR("#7B61FFFF"));
         this->netIndicator = Rectangle::New(0, 0, 6, 6, COLOR("#FF3B30FF"), 3);
         this->wifiBar1 = Rectangle::New(0, 0, 4, 4, COLOR("#FFFFFF55"));
         this->wifiBar2 = Rectangle::New(0, 0, 4, 7, COLOR("#FFFFFF55"));
@@ -972,7 +972,7 @@ namespace inst::ui {
         this->loadingBarBack->SetVisible(false);
         this->loadingBarFill = Rectangle::New(260, 540, 0, 14, COLOR("#34C759FF"));
         this->loadingBarFill->SetVisible(false);
-        this->loadingStagesBack = Rectangle::New(220, 208, 840, 276, inst::config::oledMode ? COLOR("#101010CC") : COLOR("#170909CC"));
+        this->loadingStagesBack = Rectangle::New(220, 208, 840, 276, inst::config::oledMode ? COLOR("#101010CC") : COLOR("#141A2ECC"));
         this->loadingStagesBack->SetVisible(false);
         this->loadingStagesText = TextBlock::New(252, 230, "", 24);
         this->loadingStagesText->SetColor(COLOR("#E9FFF2FF"));
@@ -989,7 +989,7 @@ namespace inst::ui {
             this->menu->SetScrollbarColor(COLOR("#FFFFFF66"));
         } else {
             this->menu->SetOnFocusColor(COLOR("#00000033"));
-            this->menu->SetScrollbarColor(COLOR("#17090980"));
+            this->menu->SetScrollbarColor(COLOR("#141A2E80"));
         }
         this->infoImage = Image::New(34, 90, "romfs:/images/icons/remote-connection-waiting.png");
         this->previewImage = Image::New(900, 230, "romfs:/images/icons/title-placeholder.png");
@@ -1044,12 +1044,12 @@ namespace inst::ui {
         this->emptySectionText = TextBlock::New(0, 350, "", 28);
         this->emptySectionText->SetColor(COLOR("#FFFFFFFF"));
         this->emptySectionText->SetVisible(false);
-        this->descriptionRect = Rectangle::New(10, 508, 1260, 142, inst::config::oledMode ? COLOR("#000000CC") : COLOR("#170909CC"));
+        this->descriptionRect = Rectangle::New(10, 508, 1260, 142, inst::config::oledMode ? COLOR("#000000CC") : COLOR("#141A2ECC"));
         this->descriptionRect->SetVisible(false);
         this->descriptionText = TextBlock::New(22, 518, "", 18);
         this->descriptionText->SetColor(COLOR("#FFFFFFFF"));
         this->descriptionText->SetVisible(false);
-        this->descriptionOverlayRect = Rectangle::New(24, 86, 1232, 564, inst::config::oledMode ? COLOR("#000000EE") : COLOR("#170909EE"));
+        this->descriptionOverlayRect = Rectangle::New(24, 86, 1232, 564, inst::config::oledMode ? COLOR("#000000EE") : COLOR("#141A2EEE"));
         this->descriptionOverlayRect->SetVisible(false);
         this->descriptionOverlayTitleText = TextBlock::New(46, 102, "", 24);
         this->descriptionOverlayTitleText->SetColor(COLOR("#FFFFFFFF"));
@@ -1060,7 +1060,7 @@ namespace inst::ui {
         this->descriptionOverlayHintText = TextBlock::New(46, 618, "B Close    Up/Down Scroll", 18);
         this->descriptionOverlayHintText->SetColor(COLOR("#FFFFFFFF"));
         this->descriptionOverlayHintText->SetVisible(false);
-        this->saveVersionSelectorRect = Rectangle::New(90, 96, 1100, 548, inst::config::oledMode ? COLOR("#000000EE") : COLOR("#170909EE"));
+        this->saveVersionSelectorRect = Rectangle::New(90, 96, 1100, 548, inst::config::oledMode ? COLOR("#000000EE") : COLOR("#141A2EEE"));
         this->saveVersionSelectorRect->SetVisible(false);
         this->saveVersionSelectorTitleText = TextBlock::New(114, 112, "", 24);
         this->saveVersionSelectorTitleText->SetColor(COLOR("#FFFFFFFF"));
@@ -1071,7 +1071,7 @@ namespace inst::ui {
             this->saveVersionSelectorMenu->SetScrollbarColor(COLOR("#FFFFFF66"));
         } else {
             this->saveVersionSelectorMenu->SetOnFocusColor(COLOR("#00000033"));
-            this->saveVersionSelectorMenu->SetScrollbarColor(COLOR("#17090980"));
+            this->saveVersionSelectorMenu->SetScrollbarColor(COLOR("#141A2E80"));
         }
         this->saveVersionSelectorMenu->SetVisible(false);
         this->saveVersionSelectorDetailText = TextBlock::New(114, 524, "", 18);

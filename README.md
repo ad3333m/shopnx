@@ -1,44 +1,25 @@
-# CyberFoil
-[![Latest version](https://img.shields.io/github/v/release/luketanti/CyberFoil?label=version)](https://github.com/luketanti/CyberFoil/releases/latest)
-![GitHub all releases downloads](https://img.shields.io/github/downloads/luketanti/CyberFoil/total)
-![GitHub latest release downloads](https://img.shields.io/github/downloads/luketanti/CyberFoil/latest/total)
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?logo=discord&logoColor=white)](https://discord.gg/gGy7hWxJeP)
+# ShopNX
 
+An NSP / NSZ / XCI / XCZ installer for Nintendo Switch with a cleaner look, built on
+[CyberFoil](https://github.com/luketanti/CyberFoil) (GPL-3.0), which is built on Awoo Installer.
 
-## Features
-- Simple homebrew file installer
-- Works best with AeroFoil
-- Save Data Backup manager: browse console/server saves, upload with notes, download specific own save data versions, and delete save data files from server
+## Shops
+Open **Shops** and add a shop profile (URL, optional username and password). One app handles:
 
-## Save Sync (Only works with compatible AeroFoil)
-- Available when the account has backup access.
-- Shows local console saves and remote server save data backups in a dedicated `Saves` section.
-- Upload supports version notes.
-- Download/delete of remote save data backups supports per-version selection with an in-page selector layout.
+- **CyberFoil / AeroFoil / Ownfoil shops**: the sectioned `/api/shop` API (CyberFoil Mode).
+- **Tinfoil shops**: JSON indexes with `files` / `directories` (Tinfoil / DBI Mode).
+- **DBI shops**: plain Apache / nginx / lighttpd folder listings. Every `.nsp/.nsz/.xci/.xcz`
+  link is listed, and sub-folders are followed up to 4 levels deep.
 
-## Cheats (Currently only works with AeroFoil)
-- Browse cheats published by a compatible AeroFoil server in the dedicated `Cheats` section.
-- Download and install individual cheats, or install all available cheats at once.
-- Cheats are installed to `atmosphere/contents/<title-id>/cheats/<build-id>.txt`.
-- Manage local cheats: view, create, edit, and delete cheat files; upload edited cheats to AeroFoil when permitted.
+ShopNX ships with no shops configured. Shops that only accept the genuine Tinfoil client
+(HAUTH signing) are not supported.
 
-## Offline Metadata/Icons
-- CyberFoil can use local title metadata and local icons from `sdmc:/switch/CyberFoil/offline_db/`.
+Also installs from SD card, USB drive, USB (NS-USBloader), LAN and MTP.
 
-## Configuration
-- `sdmc:/switch/CyberFoil/config.json` supports optional `httpUserAgentMode` and `httpUserAgent`.
-- `httpUserAgentMode` can be `default`, `chrome`, `safari`, `firefox`, `tinfoil`, or `custom`.
-- `default` uses `cyberfoil`.
-- `tinfoil` sends an empty User-Agent value.
-- Preset/custom modes are applied across network requests (downloads, Remote, and save sync).
-- `httpUserAgent` is used when `httpUserAgentMode` is `custom`.
+## Install
+Copy `switch/ShopNX/shopnx.nro` from `ShopNX.zip` (GitHub Releases) to your SD card.
+Settings live in `sdmc:/switch/ShopNX/`.
 
-## Release Package Layout
-- Build output: `cyberfoil.nro`
-- SD layout in release zip: `switch/CyberFoil/cyberfoil.nro`
-
-## Note
-- Uses [XorTroll's Plutonium](https://github.com/XorTroll/Plutonium) for a pretty graphical interface
-
-
-
+## Build
+CI builds in the `devkitpro/devkita64` container (`.github/workflows/build.yml`).
+`python3 tools/make_art.py` regenerates the background, logo and icon.
