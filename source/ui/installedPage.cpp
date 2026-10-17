@@ -108,9 +108,13 @@ namespace inst::ui {
                         std::snprintf(hex, sizeof(hex), "%016lX", t.id);
                         t.name = hex;
                     }
+                    // libnx leaves this opaque: 4 x {u8 storage, pad[7], u64 app, u64 patch, u64 dlc}
                     NsApplicationOccupiedSize occ{};
-                    if (R_SUCCEEDED(nsCalculateApplicationOccupiedSize(t.id, &occ)))
-                        for (auto& l : occ.layout) t.size += l.sizeApplication + l.sizePatch + l.sizeAddOnContent;
+                    if (R_SUCCEEDED(nsCalculateApplicationOccupiedSize(t.id, &occ))) {
+                        u64 parts[16];
+                        std::memcpy(parts, &occ, sizeof(parts));
+                        for (int e = 0; e < 4; e++) t.size += parts[e * 4 + 1] + parts[e * 4 + 2] + parts[e * 4 + 3];
+                    }
                     this->titles.push_back(t);
                 }
                 offset += count;
