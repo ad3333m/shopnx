@@ -117,6 +117,7 @@ namespace inst::ui {
         this->hddinstPage = hddInstPage::New();
         this->instpage = instPage::New();
         this->optionspage = optionsPage::New();
+        this->installedpage = installedPage::New();
         this->mainPage->SetOnInput(std::bind(&MainPage::onInput, this->mainPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->netinstPage->SetOnInput(std::bind(&netInstPage::onInput, this->netinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->remoteinstPage->SetOnInput(std::bind(&remoteInstPage::onInput, this->remoteinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
@@ -125,6 +126,7 @@ namespace inst::ui {
         this->hddinstPage->SetOnInput(std::bind(&hddInstPage::onInput, this->hddinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->instpage->SetOnInput(std::bind(&instPage::onInput, this->instpage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->optionspage->SetOnInput(std::bind(&optionsPage::onInput, this->optionspage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+        this->installedpage->SetOnInput(std::bind(&installedPage::onInput, this->installedpage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->LoadLayout(this->mainPage);
 
         this->AddThread([this]() {
@@ -623,6 +625,7 @@ namespace inst::ui {
             applyAll(this->hddinstPage);
             applyAll(this->instpage);
             applyAll(this->optionspage);
+            applyAll(this->installedpage);
         });
     }
 }

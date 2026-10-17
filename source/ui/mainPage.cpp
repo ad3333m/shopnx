@@ -24,16 +24,16 @@ namespace inst::ui {
     bool appletFinished = false;
     bool updateFinished = false;
     bool offlineDbUpdateCheckFinished = false;
-    constexpr int kMainGridCols = 3;
-    constexpr int kMainGridRows = 3;
-    constexpr int kMainGridTileWidth = 360;
-    constexpr int kMainGridTileHeight = 170;
-    constexpr int kMainGridGapX = 20;
-    constexpr int kMainGridGapY = 18;
+    constexpr int kMainGridCols = 5;
+    constexpr int kMainGridRows = 2;
+    constexpr int kMainGridTileWidth = 232;
+    constexpr int kMainGridTileHeight = 250;
+    constexpr int kMainGridGapX = 16;
+    constexpr int kMainGridGapY = 24;
     constexpr int kMainGridStartX = (1280 - ((kMainGridCols * kMainGridTileWidth) + ((kMainGridCols - 1) * kMainGridGapX))) / 2;
-    constexpr int kMainGridStartY = 100;
+    constexpr int kMainGridStartY = 110;
     constexpr int kMainLabelPaddingX = 18;
-    constexpr int kMainLabelY = 116;
+    constexpr int kMainLabelY = 172;
     constexpr int kMainLabelWidth = kMainGridTileWidth - (kMainLabelPaddingX * 2);
     constexpr int kMainLabelHeight = 28;
 
@@ -352,6 +352,7 @@ namespace inst::ui {
         const auto tileColor = inst::config::oledMode ? COLOR("#1A1A1ACC") : COLOR("#141A2ECC");
         const auto highlightColor = inst::config::oledMode ? COLOR("#7B61FF66") : COLOR("#7B61FF88");
         const std::vector<std::string> gridLabels = {
+            "Installed games",
             "main.menu.remote"_lang,
             "main.menu.sd"_lang,
             "main.menu.hdd"_lang,
@@ -363,6 +364,7 @@ namespace inst::ui {
             "main.menu.exit"_lang
         };
         const std::vector<std::string> gridIcons = {
+            "romfs:/images/icons/apps.png",
             "romfs:/images/icons/remote.png",
             "romfs:/images/icons/micro-sd.png",
             "romfs:/images/icons/usb-install.png",
@@ -383,7 +385,7 @@ namespace inst::ui {
             const int y = kMainGridStartY + (row * (kMainGridTileHeight + kMainGridGapY));
             auto tile = Rectangle::New(x, y, kMainGridTileWidth, kMainGridTileHeight, tileColor, 18);
             constexpr int kMainIconSize = 96;
-            auto icon = Image::New(x + ((kMainGridTileWidth - kMainIconSize) / 2), y + 22, gridIcons[i]);
+            auto icon = Image::New(x + ((kMainGridTileWidth - kMainIconSize) / 2), y + 52, gridIcons[i]);
             icon->SetWidth(kMainIconSize);
             icon->SetHeight(kMainIconSize);
             auto label = OverflowText::New(22, COLOR("#FFFFFFFF"));
@@ -784,30 +786,33 @@ namespace inst::ui {
     void MainPage::activateSelectedMainItem() {
         switch (this->selectedMainIndex) {
             case 0:
-                this->remoteInstallMenuItem_Click();
+                mainApp->installedpage->open();
                 break;
             case 1:
-                this->installMenuItem_Click();
+                this->remoteInstallMenuItem_Click();
                 break;
             case 2:
-                this->hddInstallMenuItem_Click();
+                this->installMenuItem_Click();
                 break;
             case 3:
-                this->mtpInstallMenuItem_Click();
+                this->hddInstallMenuItem_Click();
                 break;
             case 4:
-                this->usbInstallMenuItem_Click();
+                this->mtpInstallMenuItem_Click();
                 break;
             case 5:
-                this->netInstallMenuItem_Click();
+                this->usbInstallMenuItem_Click();
                 break;
             case 6:
-                this->backupSaveDataMenuItem_Click();
+                this->netInstallMenuItem_Click();
                 break;
             case 7:
-                this->settingsMenuItem_Click();
+                this->backupSaveDataMenuItem_Click();
                 break;
             case 8:
+                this->settingsMenuItem_Click();
+                break;
+            case 9:
                 this->exitMenuItem_Click();
                 break;
             default:
@@ -820,38 +825,42 @@ namespace inst::ui {
         std::string desc;
         switch (this->selectedMainIndex) {
             case 0:
+                title = "Installed games";
+                desc = "Browse the games on this console, see their version and size, and delete them.";
+                break;
+            case 1:
                 title = "main.menu.remote"_lang;
                 desc = "main.info.remote"_lang;
                 break;
-            case 1:
+            case 2:
                 title = "main.menu.sd"_lang;
                 desc = "main.info.sd"_lang;
                 break;
-            case 2:
+            case 3:
                 title = "main.menu.hdd"_lang;
                 desc = "main.info.hdd"_lang;
                 break;
-            case 3:
+            case 4:
                 title = "main.menu.mtp"_lang;
                 desc = "main.info.mtp"_lang;
                 break;
-            case 4:
+            case 5:
                 title = "main.menu.usb"_lang;
                 desc = "main.info.usb"_lang;
                 break;
-            case 5:
+            case 6:
                 title = "main.menu.net"_lang;
                 desc = "main.info.net"_lang;
                 break;
-            case 6:
+            case 7:
                 title = "main.menu.backup"_lang;
                 desc = "main.info.backup"_lang;
                 break;
-            case 7:
+            case 8:
                 title = "main.menu.set"_lang;
                 desc = "main.info.set"_lang;
                 break;
-            case 8:
+            case 9:
                 title = "main.menu.exit"_lang;
                 desc = "main.info.exit"_lang;
                 break;

@@ -9,6 +9,7 @@
 #include "ui/hddInstPage.hpp"
 #include "ui/instPage.hpp"
 #include "ui/optionsPage.hpp"
+#include "ui/installedPage.hpp"
 
 namespace inst::ui {
     class MainApplication;
@@ -30,6 +31,7 @@ namespace inst::ui {
             hddInstPage::Ref hddinstPage;
             instPage::Ref instpage;
             optionsPage::Ref optionspage;
+            installedPage::Ref installedpage;
         private:
             AppletFocusState lastFocusState = AppletFocusState_InFocus;
     };

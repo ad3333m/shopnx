@@ -92,6 +92,9 @@ namespace {
         url.erase(url.find_last_not_of(" \t\r\n") + 1);
         if (url.empty())
             return url;
+        // DBI config line pasted as-is: "MyShop=ApacheHTTP|https://host/path/"
+        if (url.find('|') != std::string::npos)
+            url = url.substr(url.rfind('|') + 1);
         if (url.rfind("http://", 0) != 0 && url.rfind("https://", 0) != 0)
             url = "http://" + url;
         if (!url.empty() && url.back() == '/')
@@ -564,7 +567,8 @@ namespace {
     {
         std::string lower = body;
         std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
-        return lower.find("<!doctype html") != std::string::npos || lower.find("<html") != std::string::npos;
+        return lower.find("<!doctype html") != std::string::npos || lower.find("<html") != std::string::npos ||
+               lower.find("<a href") != std::string::npos; // bare listing fragments from minimal DBI shop servers
     }
 
     bool IsLoginUrl(const char* effectiveUrl)
