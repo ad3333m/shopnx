@@ -12,7 +12,8 @@
 #include "mtp_server.hpp"
 #include "switch.h"
 
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
+#include "ui/theme.hpp"
+#define COLOR(hex) inst::ui::theme::Map(hex)
 
 namespace inst::ui {
     MainApplication *mainApp;
@@ -129,6 +130,8 @@ namespace inst::ui {
         this->installedpage->SetOnInput(std::bind(&installedPage::onInput, this->installedpage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
         this->LoadLayout(this->mainPage);
 
+        inst::ui::theme::MusicInit();
+        this->AddThread(inst::ui::theme::MusicTick);
         this->AddThread([this]() {
             this->RefreshInputDevice();
         });

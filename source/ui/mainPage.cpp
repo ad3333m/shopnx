@@ -17,7 +17,8 @@
 #include "nx/usbhdd.h"
 #include "ui/bottomHint.hpp"
 
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
+#include "ui/theme.hpp"
+#define COLOR(hex) inst::ui::theme::Map(hex)
 
 namespace inst::ui {
     extern MainApplication *mainApp;
@@ -263,18 +264,18 @@ namespace inst::ui {
         } else {
             this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
-            else this->SetBackgroundImage("romfs:/images/background.jpg");
+            else this->SetBackgroundImage(inst::ui::theme::Background());
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
         this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
-            this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
@@ -301,7 +302,8 @@ namespace inst::ui {
         this->batteryOutline = Rectangle::New(0, 0, 24, 12, COLOR("#FFFFFF66"));
         this->batteryFill = Rectangle::New(0, 0, 0, 10, COLOR("#4CD964FF"));
         this->batteryCap = Rectangle::New(0, 0, 3, 6, COLOR("#FFFFFF66"));
-        const std::string mainButtonsText = "main.buttons"_lang + "     " + "main.info.button"_lang;
+        const std::string mainButtonsText = "main.buttons"_lang + "     " + "main.info.button"_lang
+            + "    / Track     Pause     Theme";
         this->butText = TextBlock::New(10, 678, mainButtonsText, 20);
         this->butText->SetColor(COLOR("#FFFFFFFF"));
         this->bottomHintSegments = BuildBottomHintSegments(mainButtonsText, 10, 20);
@@ -350,7 +352,7 @@ namespace inst::ui {
         this->exitMenuItem->SetColor(COLOR("#FFFFFFFF"));
         this->exitMenuItem->SetIcon("romfs:/images/icons/exit-run.png");
         const auto tileColor = inst::config::oledMode ? COLOR("#1A1A1ACC") : COLOR("#141A2ECC");
-        const auto highlightColor = inst::config::oledMode ? COLOR("#7B61FF66") : COLOR("#7B61FF88");
+        const auto highlightColor = inst::ui::theme::Accent();
         const std::vector<std::string> gridLabels = {
             "Installed games",
             "main.menu.remote"_lang,
@@ -383,6 +385,7 @@ namespace inst::ui {
             const int row = i / kMainGridCols;
             const int x = kMainGridStartX + (col * (kMainGridTileWidth + kMainGridGapX));
             const int y = kMainGridStartY + (row * (kMainGridTileHeight + kMainGridGapY));
+            this->mainGridBorders.push_back(Rectangle::New(x - 2, y - 2, kMainGridTileWidth + 4, kMainGridTileHeight + 4, inst::ui::theme::Line(), 20));
             auto tile = Rectangle::New(x, y, kMainGridTileWidth, kMainGridTileHeight, tileColor, 18);
             constexpr int kMainIconSize = 96;
             auto icon = Image::New(x + ((kMainGridTileWidth - kMainIconSize) / 2), y + 52, gridIcons[i]);
@@ -396,7 +399,12 @@ namespace inst::ui {
             this->mainGridIcons.push_back(icon);
             this->mainGridLabels.push_back(label);
         }
-        this->mainGridHighlight = Rectangle::New(0, 0, kMainGridTileWidth + 8, kMainGridTileHeight + 8, highlightColor, 20);
+        this->mainGridHighlight = Rectangle::New(0, 0, kMainGridTileWidth + 6, kMainGridTileHeight + 6, highlightColor, 21);
+        this->themePill = std::make_shared<inst::ui::theme::Pill>(kMainGridStartX, 79, 26, 16);
+        this->themePill->SetText(std::string("Theme: ") + inst::ui::theme::CurrentName());
+        this->musicPill = std::make_shared<inst::ui::theme::Pill>(this->themePill->Right() + 10, 79, 26, 16);
+        this->musicPillLabel = inst::ui::theme::MusicLabel();
+        this->musicPill->SetText(this->musicPillLabel);
         if (std::filesystem::exists(inst::config::appDir + "/awoo_main.png")) this->awooImage = Image::New(410, 190, inst::config::appDir + "/awoo_main.png");
         else this->awooImage = Image::New(410, 190, "romfs:/images/awoos/5bbdbcf9a5625cd307c9e9bc360d78bd.png");
         this->Add(this->awooImage);
@@ -422,13 +430,17 @@ namespace inst::ui {
         this->Add(this->timeText);
         this->Add(this->ipText);
         this->Add(this->butText);
+        this->themePill->AddTo(this);
+        this->musicPill->AddTo(this);
+        for (auto& border : this->mainGridBorders)
+            this->Add(border);
+        this->Add(this->mainGridHighlight);
         for (auto& tile : this->mainGridTiles)
             this->Add(tile);
         for (auto& icon : this->mainGridIcons)
             this->Add(icon);
         for (auto& label : this->mainGridLabels)
             label->Attach(this);
-        this->Add(this->mainGridHighlight);
         this->Add(this->backupUserPickerRect);
         this->Add(this->backupUserPickerTitle);
         this->Add(this->optionMenu);
@@ -701,8 +713,8 @@ namespace inst::ui {
         const int row = this->selectedMainIndex / kMainGridCols;
         const int x = kMainGridStartX + (col * (kMainGridTileWidth + kMainGridGapX));
         const int y = kMainGridStartY + (row * (kMainGridTileHeight + kMainGridGapY));
-        this->mainGridHighlight->SetX(x - 4);
-        this->mainGridHighlight->SetY(y - 4);
+        this->mainGridHighlight->SetX(x - 3);
+        this->mainGridHighlight->SetY(y - 3);
         this->updateMainGridLabelEffects(true);
     }
 
@@ -886,6 +898,17 @@ namespace inst::ui {
         }
         if (Down & HidNpadButton_Y) {
             this->showSelectedMainInfo();
+        }
+        if (Down & HidNpadButton_L) inst::ui::theme::MusicPrev();
+        if (Down & HidNpadButton_R) inst::ui::theme::MusicNext();
+        if (Down & HidNpadButton_ZR) inst::ui::theme::MusicToggle();
+        if (const std::string label = inst::ui::theme::MusicLabel(); label != this->musicPillLabel) {
+            this->musicPillLabel = label;
+            this->musicPill->SetText(label);
+        }
+        if (Down & HidNpadButton_X) {
+            inst::ui::theme::Pick(false);
+            return;
         }
         if (Down & (HidNpadButton_Left | HidNpadButton_StickLLeft)) {
             if ((this->selectedMainIndex % kMainGridCols) > 0) {

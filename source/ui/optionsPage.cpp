@@ -16,7 +16,8 @@
 #include "remoteInstall.hpp"
 #include "ui/bottomHint.hpp"
 
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
+#include "ui/theme.hpp"
+#define COLOR(hex) inst::ui::theme::Map(hex)
 
 namespace inst::ui {
     extern MainApplication *mainApp;
@@ -262,7 +263,7 @@ namespace inst::ui {
         } else {
             this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
-            else this->SetBackgroundImage("romfs:/images/background.jpg");
+            else this->SetBackgroundImage(inst::ui::theme::Background());
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
@@ -272,11 +273,11 @@ namespace inst::ui {
         this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
         this->sideNavRect = Rectangle::New(0, 136, 300, 523, inst::config::oledMode ? COLOR("#FFFFFF18") : COLOR("#141A2EA0"));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
-            this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
@@ -502,7 +503,7 @@ namespace inst::ui {
             addItem("options.menu_items.boost_mode"_lang, true, inst::config::overClock);
             addItem("options.menu_items.ask_delete"_lang, true, inst::config::deletePrompt);
             addItem("options.menu_items.sound"_lang, true, inst::config::soundEnabled);
-            addItem("options.menu_items.oled"_lang, true, inst::config::oledMode);
+            addItem(std::string("Theme: ") + inst::ui::theme::CurrentName(), false, false);
             addItem("options.menu_items.mtp_album"_lang, true, inst::config::mtpExposeAlbum);
             return;
         }
@@ -1134,26 +1135,7 @@ namespace inst::ui {
                     this->refreshOptions();
                     break;
                 case 7:
-                    inst::config::oledMode = !inst::config::oledMode;
-                    inst::config::setConfig();
-                    {
-                        auto keepAlive = mainApp->optionspage;
-                        mainApp->mainPage = MainPage::New();
-                        mainApp->instpage = instPage::New();
-                        mainApp->sdinstPage = sdInstPage::New();
-                        mainApp->netinstPage = netInstPage::New();
-                        mainApp->usbinstPage = usbInstPage::New();
-                        mainApp->remoteinstPage = remoteInstPage::New();
-                        mainApp->optionspage = optionsPage::New();
-                        mainApp->mainPage->SetOnInput(std::bind(&MainPage::onInput, mainApp->mainPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->netinstPage->SetOnInput(std::bind(&netInstPage::onInput, mainApp->netinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->remoteinstPage->SetOnInput(std::bind(&remoteInstPage::onInput, mainApp->remoteinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->sdinstPage->SetOnInput(std::bind(&sdInstPage::onInput, mainApp->sdinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->usbinstPage->SetOnInput(std::bind(&usbInstPage::onInput, mainApp->usbinstPage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->instpage->SetOnInput(std::bind(&instPage::onInput, mainApp->instpage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->optionspage->SetOnInput(std::bind(&optionsPage::onInput, mainApp->optionspage, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-                        mainApp->LoadLayout(mainApp->optionspage);
-                    }
+                    inst::ui::theme::Pick(true);
                     break;
                 case 8:
                     inst::config::mtpExposeAlbum = !inst::config::mtpExposeAlbum;

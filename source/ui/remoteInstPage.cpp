@@ -24,19 +24,27 @@
 #include "util/util.hpp"
 #include "ui/bottomHint.hpp"
 
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
+#include "ui/theme.hpp"
+#define COLOR(hex) inst::ui::theme::Map(hex)
 #define RemoteDlcTrace(...) ((void)0)
 #define ResetRemoteDlcTrace() ((void)0)
 
 namespace {
-    constexpr int kGridCols = 10;
-    constexpr int kGridRows = 4;
-    constexpr int kGridTileWidth = 120;
-    constexpr int kGridTileHeight = 120;
-    constexpr int kGridGap = 6;
-    constexpr int kGridWidth = (kGridCols * kGridTileWidth) + ((kGridCols - 1) * kGridGap);
-    constexpr int kGridStartX = (1280 - kGridWidth) / 2;
-    constexpr int kGridStartY = 120;
+    // Luma-style cards: icon on top, title and size underneath.
+    constexpr int kGridCols = 6;
+    constexpr int kGridRows = 2;
+    constexpr int kGridTileWidth = 176;
+    constexpr int kGridTileHeight = 176;
+    constexpr int kGridGap = 14;
+    constexpr int kCardPad = 8;
+    constexpr int kCardTextHeight = 46;
+    constexpr int kCardWidth = kGridTileWidth + (kCardPad * 2);
+    constexpr int kCardHeight = kGridTileHeight + (kCardPad * 2) + kCardTextHeight;
+    constexpr int kGridStepX = kCardWidth + kGridGap;
+    constexpr int kGridStepY = kCardHeight + kGridGap;
+    constexpr int kGridWidth = (kGridCols * kCardWidth) + ((kGridCols - 1) * kGridGap);
+    constexpr int kGridStartX = (1280 - kGridWidth) / 2 + kCardPad;
+    constexpr int kGridStartY = 146 + kCardPad;
     constexpr int kGridItemsPerPage = kGridCols * kGridRows;
     constexpr int kListMarqueeStartDelayMs = 2000;
     constexpr int kListMarqueeEndPauseMs = 260;
@@ -923,7 +931,7 @@ namespace inst::ui {
         } else {
             this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
-            else this->SetBackgroundImage("romfs:/images/background.jpg");
+            else this->SetBackgroundImage(inst::ui::theme::Background());
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
@@ -932,11 +940,11 @@ namespace inst::ui {
         this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
         this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
-            this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
             this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
@@ -995,8 +1003,24 @@ namespace inst::ui {
         this->previewImage = Image::New(900, 230, "romfs:/images/icons/title-placeholder.png");
         this->previewImage->SetWidth(320);
         this->previewImage->SetHeight(320);
-        auto highlightColor = inst::config::oledMode ? COLOR("#FFFFFF66") : COLOR("#FFFFFF33");
-        this->gridHighlight = Rectangle::New(0, 0, kGridTileWidth + 8, kGridTileHeight + 8, highlightColor);
+        this->gridHighlight = Rectangle::New(0, 0, kCardWidth + 6, kCardHeight + 6, inst::ui::theme::Accent(), 19);
+        for (int i = 0; i < kGridItemsPerPage; i++) {
+            const int cx = kGridStartX - kCardPad + ((i % kGridCols) * kGridStepX);
+            const int cy = kGridStartY - kCardPad + ((i / kGridCols) * kGridStepY);
+            this->gridCardBorders.push_back(Rectangle::New(cx - 2, cy - 2, kCardWidth + 4, kCardHeight + 4, inst::ui::theme::Line(), 18));
+            this->gridCards.push_back(Rectangle::New(cx, cy, kCardWidth, kCardHeight, inst::ui::theme::Panel(), 16));
+            auto title = TextBlock::New(cx + 10, cy + kCardPad + kGridTileHeight + 6, "", 16);
+            title->SetColor(inst::ui::theme::Text());
+            this->gridCardTitles.push_back(title);
+            auto size = TextBlock::New(cx + 10, cy + kCardPad + kGridTileHeight + 27, "", 14);
+            size->SetColor(inst::ui::theme::Muted());
+            this->gridCardSizes.push_back(size);
+        }
+        this->showGridCards(-1);
+        this->cartPill = std::make_shared<inst::ui::theme::Pill>(1280 - 150, 89, 30, 18);
+        this->cartBadge = Rectangle::New(0, 94, 30, 20, inst::ui::theme::Green(), 10);
+        this->cartBadgeText = TextBlock::New(0, 94, "0", 15);
+        this->cartBadgeText->SetColor(pu::ui::Color(255, 255, 255, 255));
         this->gridHighlight->SetVisible(false);
         this->gridImages.reserve(kGridItemsPerPage);
         for (int i = 0; i < kGridItemsPerPage; i++) {
@@ -1116,13 +1140,24 @@ namespace inst::ui {
 #pragma GCC diagnostic pop
         this->Add(this->infoImage);
         this->Add(this->previewImage);
+        for (auto& border : this->gridCardBorders)
+            this->Add(border);
+        this->Add(this->gridHighlight);
+        for (auto& card : this->gridCards)
+            this->Add(card);
+        for (auto& title : this->gridCardTitles)
+            this->Add(title);
+        for (auto& size : this->gridCardSizes)
+            this->Add(size);
         for (auto& highlight : this->remoteGridSelectHighlights)
             this->Add(highlight);
         for (auto& img : this->gridImages)
             this->Add(img);
         for (auto& icon : this->remoteGridSelectIcons)
             this->Add(icon);
-        this->Add(this->gridHighlight);
+        this->cartPill->AddTo(this);
+        this->Add(this->cartBadge);
+        this->Add(this->cartBadgeText);
         this->Add(this->gridTitleText);
         this->Add(this->imageLoadingText);
         this->Add(this->listMarqueeMaskRect);
@@ -2169,6 +2204,7 @@ namespace inst::ui {
         this->imageLoadingText->SetVisible(false);
         for (auto& img : this->gridImages)
             img->SetVisible(false);
+        this->showGridCards(-1);
         for (auto& highlight : this->remoteGridSelectHighlights)
             highlight->SetVisible(false);
         for (auto& icon : this->remoteGridSelectIcons)
@@ -3291,6 +3327,7 @@ namespace inst::ui {
 
         for (auto& img : this->gridImages)
             img->SetVisible(false);
+        this->showGridCards(-1);
         this->gridHighlight->SetVisible(false);
         this->gridTitleText->SetVisible(false);
         for (auto& icon : this->remoteGridSelectIcons)
@@ -3408,6 +3445,7 @@ namespace inst::ui {
         if (!this->isInstalledSection() || !this->remoteGridMode) {
             for (auto& img : this->gridImages)
                 img->SetVisible(false);
+            this->showGridCards(-1);
             this->gridHighlight->SetVisible(false);
             this->gridTitleText->SetVisible(false);
             this->gridPage = -1;
@@ -3422,6 +3460,7 @@ namespace inst::ui {
         if (this->visibleItems.empty()) {
             for (auto& img : this->gridImages)
                 img->SetVisible(false);
+            this->showGridCards(-1);
             this->gridHighlight->SetVisible(false);
             this->gridTitleText->SetVisible(false);
             this->gridPage = -1;
@@ -3444,8 +3483,8 @@ namespace inst::ui {
                 int itemIndex = pageStart + i;
                 int row = i / kGridCols;
                 int col = i % kGridCols;
-                int x = kGridStartX + (col * (kGridTileWidth + kGridGap));
-                int y = kGridStartY + (row * (kGridTileHeight + kGridGap));
+                int x = kGridStartX + (col * kGridStepX);
+                int y = kGridStartY + (row * kGridStepY);
                 this->gridImages[i]->SetX(x);
                 this->gridImages[i]->SetY(y);
 
@@ -3494,18 +3533,19 @@ namespace inst::ui {
             if (nsReady)
                 nsExit();
             this->gridPage = page;
+            this->showGridCards(pageStart);
         }
 
         int slot = this->gridSelectedIndex - pageStart;
         if (slot >= 0 && slot < kGridItemsPerPage) {
             int row = slot / kGridCols;
             int col = slot % kGridCols;
-            int x = kGridStartX + (col * (kGridTileWidth + kGridGap)) - 4;
-            int y = kGridStartY + (row * (kGridTileHeight + kGridGap)) - 4;
+            int x = kGridStartX + (col * kGridStepX) - kCardPad - 3;
+            int y = kGridStartY + (row * kGridStepY) - kCardPad - 3;
             this->gridHighlight->SetX(x);
             this->gridHighlight->SetY(y);
-            this->gridHighlight->SetWidth(kGridTileWidth + 8);
-            this->gridHighlight->SetHeight(kGridTileHeight + 8);
+            this->gridHighlight->SetWidth(kCardWidth + 6);
+            this->gridHighlight->SetHeight(kCardHeight + 6);
             this->gridHighlight->SetVisible(true);
         } else {
             this->gridHighlight->SetVisible(false);
@@ -3521,6 +3561,45 @@ namespace inst::ui {
         this->updateDescriptionPanel();
     }
 
+    void remoteInstPage::showGridCards(int pageStart) {
+        for (int i = 0; i < kGridItemsPerPage; i++) {
+            const int itemIndex = pageStart + i;
+            const bool show = pageStart >= 0 && itemIndex < static_cast<int>(this->visibleItems.size());
+            this->gridCardBorders[i]->SetVisible(show);
+            this->gridCards[i]->SetVisible(show);
+            this->gridCardTitles[i]->SetVisible(show);
+            this->gridCardSizes[i]->SetVisible(show);
+            if (!show)
+                continue;
+            const auto& item = this->visibleItems[itemIndex];
+            this->gridCardTitles[i]->SetText(ClipSingleLineByMenuRender(OverflowText::NormalizeSingleLineText(item.name), 16, kGridTileWidth, 24, nullptr));
+            const std::string size = FormatSizeText(item.size);
+            this->gridCardSizes[i]->SetText(size.empty() ? std::string(" ") : "Size: " + size);
+        }
+    }
+
+    void remoteInstPage::updateCartPill() {
+        if (this->selectedItems.size() == this->cartPillCount)
+            return;
+        this->cartPillCount = this->selectedItems.size();
+        this->cartPill->SetText("Cart");
+        this->cartBadgeText->SetText(std::to_string(this->cartPillCount));
+        const int badgeW = std::max(30, static_cast<int>(this->cartBadgeText->GetWidth()) + 16);
+        const int pillRight = 1280 - 24;
+        const int pillW = (this->cartPill->Right() - this->cartPill->x) + badgeW + 6;
+        this->cartPill->x = pillRight - pillW;
+        this->cartPill->border->SetX(this->cartPill->x);
+        this->cartPill->border->SetWidth(pillW);
+        this->cartPill->fill->SetX(this->cartPill->x + 2);
+        this->cartPill->fill->SetWidth(pillW - 4);
+        this->cartPill->text->SetX(this->cartPill->x + 15);
+        this->cartBadge->SetX(pillRight - badgeW - 5);
+        this->cartBadge->SetWidth(badgeW);
+        this->cartBadge->SetColor(this->cartPillCount > 0 ? inst::ui::theme::Green() : inst::ui::theme::Line());
+        this->cartBadgeText->SetX(pillRight - 5 - (badgeW + static_cast<int>(this->cartBadgeText->GetWidth())) / 2);
+        this->cartBadgeText->SetY(94 + (20 - static_cast<int>(this->cartBadgeText->GetHeight())) / 2);
+    }
+
     void remoteInstPage::updateRemoteGrid() {
         this->listMarqueeMaskRect->SetVisible(false);
         this->listMarqueeTintRect->SetVisible(false);
@@ -3530,6 +3609,7 @@ namespace inst::ui {
         if (!this->remoteGridMode || this->visibleItems.empty()) {
             for (auto& img : this->gridImages)
                 img->SetVisible(false);
+            this->showGridCards(-1);
             this->gridHighlight->SetVisible(false);
             this->gridTitleText->SetVisible(false);
             for (auto& highlight : this->remoteGridSelectHighlights)
@@ -3560,8 +3640,8 @@ namespace inst::ui {
                 int itemIndex = pageStart + i;
                 int row = i / kGridCols;
                 int col = i % kGridCols;
-                int x = kGridStartX + (col * (kGridTileWidth + kGridGap));
-                int y = kGridStartY + (row * (kGridTileHeight + kGridGap));
+                int x = kGridStartX + (col * kGridStepX);
+                int y = kGridStartY + (row * kGridStepY);
                 this->gridImages[i]->SetX(x);
                 this->gridImages[i]->SetY(y);
                 this->gridImages[i]->SetWidth(kGridTileWidth);
@@ -3600,6 +3680,7 @@ namespace inst::ui {
             }
 
             this->remoteGridPage = page;
+            this->showGridCards(pageStart);
         }
 
         if (this->iconDownloadUiDirty.exchange(false)) {
@@ -3624,8 +3705,8 @@ namespace inst::ui {
             int itemIndex = pageStart + i;
             int row = i / kGridCols;
             int col = i % kGridCols;
-            int x = kGridStartX + (col * (kGridTileWidth + kGridGap));
-            int y = kGridStartY + (row * (kGridTileHeight + kGridGap));
+            int x = kGridStartX + (col * kGridStepX);
+            int y = kGridStartY + (row * kGridStepY);
 
             if (itemIndex >= maxIndex) {
                 this->remoteGridSelectHighlights[i]->SetVisible(false);
@@ -3655,12 +3736,12 @@ namespace inst::ui {
         if (slot >= 0 && slot < kGridItemsPerPage) {
             int row = slot / kGridCols;
             int col = slot % kGridCols;
-            int x = kGridStartX + (col * (kGridTileWidth + kGridGap)) - 4;
-            int y = kGridStartY + (row * (kGridTileHeight + kGridGap)) - 4;
+            int x = kGridStartX + (col * kGridStepX) - kCardPad - 3;
+            int y = kGridStartY + (row * kGridStepY) - kCardPad - 3;
             this->gridHighlight->SetX(x);
             this->gridHighlight->SetY(y);
-            this->gridHighlight->SetWidth(kGridTileWidth + 8);
-            this->gridHighlight->SetHeight(kGridTileHeight + 8);
+            this->gridHighlight->SetWidth(kCardWidth + 6);
+            this->gridHighlight->SetHeight(kCardHeight + 6);
             this->gridHighlight->SetVisible(true);
         } else {
             this->gridHighlight->SetVisible(false);
@@ -3765,6 +3846,7 @@ namespace inst::ui {
         this->saveVersionSelectorHintText->SetVisible(false);
         for (auto& img : this->gridImages)
             img->SetVisible(false);
+        this->showGridCards(-1);
         for (auto& highlight : this->remoteGridSelectHighlights)
             highlight->SetVisible(false);
         for (auto& icon : this->remoteGridSelectIcons)
@@ -4337,6 +4419,7 @@ namespace inst::ui {
     }
 
     void remoteInstPage::onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos) {
+        this->updateCartPill();
         int bottomTapX = 0;
         if (DetectBottomHintTap(Pos, this->bottomHintTouch, 668, 52, bottomTapX)) {
             Down |= FindBottomHintButton(this->bottomHintSegments, bottomTapX);
@@ -4402,6 +4485,7 @@ namespace inst::ui {
                 // Ensure list mode visibility is fully applied even when we skip full list rebuild.
                 for (auto& img : this->gridImages)
                     img->SetVisible(false);
+                this->showGridCards(-1);
                 this->gridHighlight->SetVisible(false);
                 this->gridTitleText->SetVisible(false);
                 for (auto& highlight : this->remoteGridSelectHighlights)
@@ -4621,10 +4705,10 @@ namespace inst::ui {
                 if (inGrid) {
                     const int relX = Pos.X - kGridStartX;
                     const int relY = Pos.Y - kGridStartY;
-                    const int col = relX / (kGridTileWidth + kGridGap);
-                    const int row = relY / (kGridTileHeight + kGridGap);
-                    const int tileX = relX - (col * (kGridTileWidth + kGridGap));
-                    const int tileY = relY - (row * (kGridTileHeight + kGridGap));
+                    const int col = relX / kGridStepX;
+                    const int row = relY / kGridStepY;
+                    const int tileX = relX - (col * kGridStepX);
+                    const int tileY = relY - (row * kGridStepY);
                     if (col >= 0 && col < kGridCols && row >= 0 && row < kGridRows && tileX <= kGridTileWidth && tileY <= kGridTileHeight) {
                         int page = 0;
                         if (this->remoteGridIndex > 0)
@@ -4843,10 +4927,10 @@ namespace inst::ui {
                 } else if (inGrid) {
                     const int relX = Pos.X - kGridStartX;
                     const int relY = Pos.Y - kGridStartY;
-                    const int col = relX / (kGridTileWidth + kGridGap);
-                    const int row = relY / (kGridTileHeight + kGridGap);
-                    const int tileX = relX - (col * (kGridTileWidth + kGridGap));
-                    const int tileY = relY - (row * (kGridTileHeight + kGridGap));
+                    const int col = relX / kGridStepX;
+                    const int row = relY / kGridStepY;
+                    const int tileX = relX - (col * kGridStepX);
+                    const int tileY = relY - (row * kGridStepY);
                     if (col >= 0 && col < kGridCols && row >= 0 && row < kGridRows && tileX <= kGridTileWidth && tileY <= kGridTileHeight) {
                         int page = 0;
                         if (this->gridSelectedIndex > 0)

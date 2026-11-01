@@ -24,6 +24,7 @@ namespace inst::config {
     bool gayMode;
     bool soundEnabled;
     bool oledMode;
+    int lumaTheme;
     bool mtpExposeAlbum;
     bool ignoreReqVers;
     bool overClock;
@@ -758,6 +759,7 @@ namespace inst::config {
             {"gayMode", gayMode},
             {"soundEnabled", soundEnabled},
             {"oledMode", oledMode},
+            {"lumaTheme", lumaTheme},
             {"mtpExposeAlbum", mtpExposeAlbum},
             {"ignoreReqVers", ignoreReqVers},
             {"languageSetting", languageSetting},
@@ -793,7 +795,8 @@ namespace inst::config {
         deletePrompt = true;
         gayMode = true;
         soundEnabled = true;
-        oledMode = true;
+        oledMode = false; // Luma themes (Wii Black, Classic) replace OLED mode
+        lumaTheme = 0;
         mtpExposeAlbum = false;
         ignoreReqVers = true;
         overClock = true;
@@ -826,7 +829,7 @@ namespace inst::config {
             if (j.contains("gAuthKey")) gAuthKey = j["gAuthKey"].get<std::string>();
             if (j.contains("gayMode")) gayMode = j["gayMode"].get<bool>();
             if (j.contains("soundEnabled")) soundEnabled = j["soundEnabled"].get<bool>();
-            if (j.contains("oledMode")) oledMode = j["oledMode"].get<bool>();
+            if (j.contains("lumaTheme")) lumaTheme = j["lumaTheme"].get<int>();
             if (j.contains("mtpExposeAlbum")) mtpExposeAlbum = j["mtpExposeAlbum"].get<bool>();
             if (j.contains("ignoreReqVers")) ignoreReqVers = j["ignoreReqVers"].get<bool>();
             if (j.contains("languageSetting")) languageSetting = j["languageSetting"].get<int>();
@@ -859,6 +862,7 @@ namespace inst::config {
                 "gayMode",
                 "soundEnabled",
                 "oledMode",
+                "lumaTheme",
                 "mtpExposeAlbum",
                 "ignoreReqVers",
                 "languageSetting",

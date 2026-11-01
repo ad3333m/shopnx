@@ -2,6 +2,8 @@
 #include <pu/Plutonium>
 #include "ui/bottomHint.hpp"
 #include "ui/overflowText.hpp"
+#include "ui/theme.hpp"
+#include <memory>
 
 using namespace pu::ui::elm;
 namespace inst::ui {
@@ -65,6 +67,10 @@ namespace inst::ui {
             pu::ui::elm::MenuItem::Ref backupSaveDataMenuItem;
             pu::ui::elm::MenuItem::Ref settingsMenuItem;
             pu::ui::elm::MenuItem::Ref exitMenuItem;
+            std::vector<Rectangle::Ref> mainGridBorders;
+            std::shared_ptr<inst::ui::theme::Pill> themePill;
+            std::shared_ptr<inst::ui::theme::Pill> musicPill;
+            std::string musicPillLabel;
             std::vector<Rectangle::Ref> mainGridTiles;
             std::vector<Image::Ref> mainGridIcons;
             std::vector<OverflowText::Ref> mainGridLabels;

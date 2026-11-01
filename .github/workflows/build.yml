@@ -40,6 +40,7 @@ jobs:
           cd dist && python3 -c "import shutil; shutil.make_archive('../ShopNX', 'zip', '.', 'switch')"
 
       - uses: actions/upload-artifact@v4
+        continue-on-error: true # artifact storage quota is full
         with:
           name: ShopNX
           path: |
@@ -47,6 +48,7 @@ jobs:
             ShopNX.zip
 
       - name: Release
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}

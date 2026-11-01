@@ -10,7 +10,8 @@
 #include "util/config.hpp"
 #include "util/lang.hpp"
 
-#define COLOR(hex) pu::ui::Color::FromHex(hex)
+#include "ui/theme.hpp"
+#define COLOR(hex) inst::ui::theme::Map(hex)
 
 namespace inst::ui {
     extern MainApplication *mainApp;
@@ -29,14 +30,14 @@ namespace inst::ui {
         } else {
             this->SetBackgroundColor(COLOR("#0B0F1AFF"));
             if (std::filesystem::exists(inst::config::appDir + "/background.png")) this->SetBackgroundImage(inst::config::appDir + "/background.png");
-            else this->SetBackgroundImage("romfs:/images/background.jpg");
+            else this->SetBackgroundImage(inst::ui::theme::Background());
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
         this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
         this->botRect = Rectangle::New(0, 660, 1280, 60, infoColor);
-        this->titleImage = Image::New(0, -8, "romfs:/images/logo.png");
+        this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
         this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion, 22);
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
         this->timeText = TextBlock::New(0, 18, "--:--", 22);

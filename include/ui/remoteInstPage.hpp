@@ -3,6 +3,8 @@
 #include <pu/Plutonium>
 #include "remoteInstall.hpp"
 #include "ui/bottomHint.hpp"
+#include "ui/theme.hpp"
+#include <memory>
 #include "util/save_sync.hpp"
 #include <atomic>
 #include <cstddef>
@@ -161,6 +163,14 @@ namespace inst::ui {
             Image::Ref previewImage;
             Rectangle::Ref gridHighlight;
             std::vector<Image::Ref> gridImages;
+            std::vector<Rectangle::Ref> gridCardBorders;
+            std::vector<Rectangle::Ref> gridCards;
+            std::vector<TextBlock::Ref> gridCardTitles;
+            std::vector<TextBlock::Ref> gridCardSizes;
+            std::shared_ptr<inst::ui::theme::Pill> cartPill;
+            Rectangle::Ref cartBadge;
+            TextBlock::Ref cartBadgeText;
+            std::size_t cartPillCount = static_cast<std::size_t>(-1);
             std::vector<Rectangle::Ref> remoteGridSelectHighlights;
             std::vector<Image::Ref> remoteGridSelectIcons;
             TextBlock::Ref gridTitleText;
@@ -217,6 +227,8 @@ namespace inst::ui {
             void updatePreview();
             void updateInstalledGrid();
             void updateRemoteGrid();
+            void showGridCards(int pageStart);
+            void updateCartPill();
             void updateDebug();
             const std::vector<remoteInstStuff::RemoteItem>& getCurrentItems() const;
             bool isAllSection() const;
