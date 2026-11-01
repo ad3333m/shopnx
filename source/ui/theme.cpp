@@ -103,22 +103,17 @@ namespace inst::ui::theme {
     pu::ui::elm::Image::Ref BottomBar() { return pu::ui::elm::Image::New(0, 624, std::string("romfs:/images/bar_") + Cur().key + ".png"); }
 
     namespace {
-        constexpr int kTipX = 18, kTipY = 3;          // fingertip inside pointer.png
+        constexpr int kTipX = 18, kTipY = 3;          // fingertip inside romfs pointer.png
         constexpr float kStickSpeed = 15.0f;          // px per frame at full tilt
         // ponytail: gyro gain/sign are best guesses (1.0 = 1 rev/s); tune on hardware if the hand drifts or runs backwards.
         constexpr float kGyroGain = 190.0f;
         constexpr float kGyroDeadzone = 0.008f;
-        constexpr u64 kHideAfterMs = 5000;
 
         float gPx = 640, gPy = 360;
         bool gMoved = false;
-        u64 gLastMoveMs = 0;
         PadState gPad;
         HidSixAxisSensorHandle gFullKey, gJoyDual[2];
         bool gPointerReady = false;
-
-        u64 NowMs() { return armTicksToNs(armGetSystemTick()) / 1000000; }
-        bool PointerVisible() { return gLastMoveMs != 0 && (NowMs() - gLastMoveMs) < kHideAfterMs; }
 
         class PointerElement : public pu::ui::elm::Element {
             public:
@@ -128,9 +123,15 @@ namespace inst::ui::theme {
                 s32 GetWidth() override { return 1280; }
                 s32 GetHeight() override { return 720; }
                 void OnRender(pu::ui::render::Renderer::Ref& drawer, s32, s32) override {
-                    static pu::ui::render::NativeTexture tex = pu::ui::render::LoadImage("romfs:/images/pointer.png");
-                    if (tex != nullptr && PointerVisible())
-                        drawer->RenderTexture(tex, static_cast<s32>(gPx) - kTipX, static_cast<s32>(gPy) - kTipY);
+                    // A pointer.png he drops in switch/ShopNX replaces the built-in hand; its tip is taken as a quarter in from the left.
+                    static const std::string custom = inst::config::appDir + "/pointer.png";
+                    static const bool hasCustom = std::filesystem::exists(custom);
+                    static pu::ui::render::NativeTexture tex = pu::ui::render::LoadImage(hasCustom ? custom : "romfs:/images/pointer.png");
+                    if (tex == nullptr)
+                        return;
+                    const s32 tipX = hasCustom ? pu::ui::render::GetTextureWidth(tex) / 4 : kTipX;
+                    const s32 tipY = hasCustom ? 2 : kTipY;
+                    drawer->RenderTexture(tex, static_cast<s32>(gPx) - tipX, static_cast<s32>(gPy) - tipY);
                 }
                 void OnInput(u64, u64, u64, pu::ui::Touch) override {}
         };
@@ -147,10 +148,12 @@ namespace inst::ui::theme {
         }
         padUpdate(&gPad);
         float dx = 0, dy = 0;
-        const HidAnalogStickState stick = padGetStickPos(&gPad, 1);
-        if (std::abs(stick.x) > 6000 || std::abs(stick.y) > 6000) {
-            dx += stick.x / 32767.0f * kStickSpeed;
-            dy -= stick.y / 32767.0f * kStickSpeed;
+        for (int i = 0; i < 2; i++) { // both sticks move it
+            const HidAnalogStickState stick = padGetStickPos(&gPad, i);
+            if (std::abs(stick.x) > 6000 || std::abs(stick.y) > 6000) {
+                dx += stick.x / 32767.0f * kStickSpeed;
+                dy -= stick.y / 32767.0f * kStickSpeed;
+            }
         }
         // Motion only with detached Joy-Cons or a Pro Controller, pointed like a remote; never in handheld.
         const u32 style = padGetStyleSet(&gPad);
@@ -163,15 +166,19 @@ namespace inst::ui::theme {
             if (std::abs(motion.angular_velocity.x) > kGyroDeadzone) dy -= motion.angular_velocity.x * kGyroGain;
         }
         gMoved = std::abs(dx) >= 0.5f || std::abs(dy) >= 0.5f;
-        if (!gMoved)
-            return;
         gPx = std::clamp(gPx + dx, 0.0f, 1279.0f);
         gPy = std::clamp(gPy + dy, 0.0f, 719.0f);
-        gLastMoveMs = NowMs();
+        // Handheld: the hand follows a finger on the screen, like Switch ports of pointer games.
+        HidTouchScreenState touch = {};
+        if (hidGetTouchScreenStates(&touch, 1) > 0 && touch.count > 0) {
+            gMoved = gMoved || std::abs(gPx - touch.touches[0].x) >= 1.0f || std::abs(gPy - touch.touches[0].y) >= 1.0f;
+            gPx = std::clamp(static_cast<float>(touch.touches[0].x), 0.0f, 1279.0f);
+            gPy = std::clamp(static_cast<float>(touch.touches[0].y), 0.0f, 719.0f);
+        }
     }
 
     bool PointerHover(int& x, int& y) {
-        if (!gMoved || !PointerVisible())
+        if (!gMoved)
             return false;
         x = static_cast<int>(gPx);
         y = static_cast<int>(gPy);

@@ -4421,6 +4421,12 @@ namespace inst::ui {
 
     void remoteInstPage::onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos) {
         this->updateCartPill();
+        if (this->remoteGridMode) {
+            constexpr u64 kStickL = HidNpadButton_StickLUp | HidNpadButton_StickLDown | HidNpadButton_StickLLeft | HidNpadButton_StickLRight;
+            Down &= ~kStickL; // the left stick drives the pointer over the cards; lists keep stick scrolling
+            Up &= ~kStickL;
+            Held &= ~kStickL;
+        }
         if (int px, py; this->remoteGridMode && !this->visibleItems.empty() && inst::ui::theme::PointerHover(px, py)) {
             const bool installed = this->isInstalledSection();
             int& index = installed ? this->gridSelectedIndex : this->remoteGridIndex;

@@ -24,7 +24,7 @@ namespace inst::ui::theme {
     // Curved bar along the bottom edge, behind the button hints.
     pu::ui::elm::Image::Ref BottomBar();
 
-    // Hand pointer: right stick or controller motion moves it; hovering focuses grid tiles.
+    // Hand pointer, always on screen: either stick, touch or controller motion moves it; hovering focuses grid tiles.
     void PointerTick();
     bool PointerHover(int& x, int& y); // true on frames the pointer moved
     void AttachPointer();              // adds the hand on top of every page

@@ -884,6 +884,10 @@ namespace inst::ui {
     }
 
     void MainPage::onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos) {
+        constexpr u64 kStickL = HidNpadButton_StickLUp | HidNpadButton_StickLDown | HidNpadButton_StickLLeft | HidNpadButton_StickLRight;
+        Down &= ~kStickL; // the left stick drives the pointer here; the D-pad still steps between tiles
+        Up &= ~kStickL;
+        Held &= ~kStickL;
         if (this->optionMenu != nullptr && this->optionMenu->IsVisible()) {
             return;
         }
