@@ -1,5 +1,7 @@
 #include "ui/theme.hpp"
 #include <algorithm>
+#include <cmath>
+#include <switch.h>
 #include <filesystem>
 #include <vector>
 #include <SDL2/SDL_mixer.h>
@@ -21,7 +23,7 @@ namespace inst::ui::theme {
 
         // Colours taken from Luma's five themes (Wii, Wii Black, Cafe, Pikmin, Clasico).
         const Palette kPalettes[] = {
-            {"Light",   "light",   false, 0xEAECEF, 0xFFFFFF, 0xD5DAE0, 0x4A4F55, 0x33373C, 0x6B727A, 0x34BEED, 0x3FB950},
+            {"Light",   "light",   false, 0xEAECEF, 0xFFFFFF, 0xBCC4CD, 0x4A4F55, 0x4E545B, 0x7D848C, 0x34BEED, 0x3FB950},
             {"Dark",    "dark",    true,  0x17191C, 0x23262A, 0x3A3F45, 0xD6DADE, 0xF1F3F5, 0x9AA1A8, 0x2A8CC4, 0x3FB950},
             {"Cafe",    "cafe",    false, 0xF3EFDF, 0xFFFDF6, 0xD8CFAE, 0x4A4A3C, 0x33332A, 0x7A7660, 0x6DBF45, 0x6DBF45},
             {"Space",   "space",   true,  0x0B1838, 0x13234A, 0x2F4F7A, 0xD8E4FF, 0xFFFFFF, 0x8FA3C7, 0x2F6BFF, 0x4CC35A},
@@ -55,7 +57,7 @@ namespace inst::ui::theme {
             }
             gMusic = Mix_LoadMUS(gTracks[gTrack].c_str());
             if (gMusic != nullptr)
-                Mix_PlayMusic(gMusic, 1); // MusicTick moves on to the next track
+                Mix_PlayMusic(gMusic, gTracks.size() == 1 ? -1 : 1); // MusicTick moves on to the next track
             gPaused = false;
         }
     }
@@ -97,6 +99,92 @@ namespace inst::ui::theme {
     pu::ui::Color Green() { return Rgb(Cur().green); }
     std::string Background() { return std::string("romfs:/images/theme_") + Cur().key + ".jpg"; }
     std::string Logo() { return Cur().dark ? "romfs:/images/logo.png" : "romfs:/images/logo_dark.png"; }
+    std::string Icon(const std::string& file) { return (Cur().dark ? "romfs:/images/icons/" : "romfs:/images/icons_dark/") + file; }
+    pu::ui::elm::Image::Ref BottomBar() { return pu::ui::elm::Image::New(0, 624, std::string("romfs:/images/bar_") + Cur().key + ".png"); }
+
+    namespace {
+        constexpr int kTipX = 18, kTipY = 3;          // fingertip inside pointer.png
+        constexpr float kStickSpeed = 15.0f;          // px per frame at full tilt
+        // ponytail: gyro gain/sign are best guesses (1.0 = 1 rev/s); tune on hardware if the hand drifts or runs backwards.
+        constexpr float kGyroGain = 190.0f;
+        constexpr float kGyroDeadzone = 0.008f;
+        constexpr u64 kHideAfterMs = 5000;
+
+        float gPx = 640, gPy = 360;
+        bool gMoved = false;
+        u64 gLastMoveMs = 0;
+        PadState gPad;
+        HidSixAxisSensorHandle gFullKey, gJoyDual[2];
+        bool gPointerReady = false;
+
+        u64 NowMs() { return armTicksToNs(armGetSystemTick()) / 1000000; }
+        bool PointerVisible() { return gLastMoveMs != 0 && (NowMs() - gLastMoveMs) < kHideAfterMs; }
+
+        class PointerElement : public pu::ui::elm::Element {
+            public:
+                PU_SMART_CTOR(PointerElement)
+                s32 GetX() override { return 0; }
+                s32 GetY() override { return 0; }
+                s32 GetWidth() override { return 1280; }
+                s32 GetHeight() override { return 720; }
+                void OnRender(pu::ui::render::Renderer::Ref& drawer, s32, s32) override {
+                    static pu::ui::render::NativeTexture tex = pu::ui::render::LoadImage("romfs:/images/pointer.png");
+                    if (tex != nullptr && PointerVisible())
+                        drawer->RenderTexture(tex, static_cast<s32>(gPx) - kTipX, static_cast<s32>(gPy) - kTipY);
+                }
+                void OnInput(u64, u64, u64, pu::ui::Touch) override {}
+        };
+    }
+
+    void PointerTick() {
+        if (!gPointerReady) {
+            padInitializeAny(&gPad);
+            hidGetSixAxisSensorHandles(&gFullKey, 1, HidNpadIdType_No1, HidNpadStyleTag_NpadFullKey);
+            hidGetSixAxisSensorHandles(gJoyDual, 2, HidNpadIdType_No1, HidNpadStyleTag_NpadJoyDual);
+            hidStartSixAxisSensor(gFullKey);
+            hidStartSixAxisSensor(gJoyDual[1]);
+            gPointerReady = true;
+        }
+        padUpdate(&gPad);
+        float dx = 0, dy = 0;
+        const HidAnalogStickState stick = padGetStickPos(&gPad, 1);
+        if (std::abs(stick.x) > 6000 || std::abs(stick.y) > 6000) {
+            dx += stick.x / 32767.0f * kStickSpeed;
+            dy -= stick.y / 32767.0f * kStickSpeed;
+        }
+        // Motion only with detached Joy-Cons or a Pro Controller, pointed like a remote; never in handheld.
+        const u32 style = padGetStyleSet(&gPad);
+        HidSixAxisSensorState motion = {};
+        bool haveMotion = false;
+        if (style & HidNpadStyleTag_NpadFullKey) haveMotion = hidGetSixAxisSensorStates(gFullKey, &motion, 1) > 0;
+        else if (style & HidNpadStyleTag_NpadJoyDual) haveMotion = hidGetSixAxisSensorStates(gJoyDual[1], &motion, 1) > 0;
+        if (haveMotion) {
+            if (std::abs(motion.angular_velocity.z) > kGyroDeadzone) dx -= motion.angular_velocity.z * kGyroGain;
+            if (std::abs(motion.angular_velocity.x) > kGyroDeadzone) dy -= motion.angular_velocity.x * kGyroGain;
+        }
+        gMoved = std::abs(dx) >= 0.5f || std::abs(dy) >= 0.5f;
+        if (!gMoved)
+            return;
+        gPx = std::clamp(gPx + dx, 0.0f, 1279.0f);
+        gPy = std::clamp(gPy + dy, 0.0f, 719.0f);
+        gLastMoveMs = NowMs();
+    }
+
+    bool PointerHover(int& x, int& y) {
+        if (!gMoved || !PointerVisible())
+            return false;
+        x = static_cast<int>(gPx);
+        y = static_cast<int>(gPy);
+        return true;
+    }
+
+    void AttachPointer() {
+        const std::vector<pu::ui::Layout::Ref> pages = {mainApp->mainPage, mainApp->netinstPage, mainApp->remoteinstPage,
+            mainApp->sdinstPage, mainApp->usbinstPage, mainApp->hddinstPage, mainApp->instpage, mainApp->optionspage,
+            mainApp->installedpage};
+        for (const auto& page : pages)
+            page->Add(PointerElement::New());
+    }
 
     void Pick(bool backToOptions) {
         std::vector<std::string> names;
@@ -128,6 +216,7 @@ namespace inst::ui::theme {
         mainApp->remoteinstPage->SetOnInput(std::bind(&remoteInstPage::onInput, mainApp->remoteinstPage, _1, _2, _3, _4));
         mainApp->optionspage->SetOnInput(std::bind(&optionsPage::onInput, mainApp->optionspage, _1, _2, _3, _4));
         mainApp->installedpage->SetOnInput(std::bind(&installedPage::onInput, mainApp->installedpage, _1, _2, _3, _4));
+        AttachPointer();
         if (backToOptions) mainApp->LoadLayout(mainApp->optionspage);
         else mainApp->LoadLayout(mainApp->mainPage);
     }
@@ -166,9 +255,9 @@ namespace inst::ui::theme {
             if (entry.is_regular_file(ec) && std::find(exts.begin(), exts.end(), ext) != exts.end())
                 gTracks.push_back(entry.path().string());
         }
-        if (gTracks.empty())
-            return;
         std::sort(gTracks.begin(), gTracks.end());
+        if (gTracks.empty())
+            gTracks.push_back("romfs:/audio/lounge.ogg"); // ShopNX's own loop until he adds music
         Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_OPUS | MIX_INIT_MOD);
         // Opened before the click sound so music gets 48 kHz; later Mix_OpenAudio calls only add a reference.
         if (Mix_OpenAudio(48000, AUDIO_S16SYS, 2, 4096) != 0)
@@ -195,8 +284,6 @@ namespace inst::ui::theme {
     }
 
     std::string MusicLabel() {
-        if (gTracks.empty())
-            return "Music: put files in switch/ShopNX/music";
         if (!gAudioReady)
             return "Music: audio unavailable";
         std::string name = std::filesystem::path(gTracks[gTrack]).stem().string();

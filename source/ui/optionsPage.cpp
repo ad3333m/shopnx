@@ -268,13 +268,13 @@ namespace inst::ui {
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->infoRect = Rectangle::New(0, 75, 1280, 60, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         this->sideNavRect = Rectangle::New(0, 136, 300, 523, inst::config::oledMode ? COLOR("#FFFFFF18") : COLOR("#141A2EA0"));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
-            this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
@@ -321,6 +321,7 @@ namespace inst::ui {
         this->Add(this->topRect);
         this->Add(this->infoRect);
         this->Add(this->botRect);
+        this->Add(inst::ui::theme::BottomBar());
         this->Add(this->sideNavRect);
         this->Add(this->titleImage);
         this->Add(this->appVersionText);
@@ -429,8 +430,8 @@ namespace inst::ui {
     }
 
     std::string optionsPage::getMenuOptionIcon(bool ourBool) {
-        if(ourBool) return "romfs:/images/icons/check-box-outline.png";
-        else return "romfs:/images/icons/checkbox-blank-outline.png";
+        if(ourBool) return inst::ui::theme::Icon("check-box-outline.png");
+        else return inst::ui::theme::Icon("checkbox-blank-outline.png");
     }
 
     std::string optionsPage::getMenuLanguage(int ourLangCode) {
@@ -1111,20 +1112,20 @@ namespace inst::ui {
                         inst::config::gayMode = true;
                         mainApp->mainPage->awooImage->SetVisible(false);
                         mainApp->instpage->awooImage->SetVisible(false);
-                        mainApp->instpage->titleImage->SetX(-113);
-                        mainApp->instpage->appVersionText->SetX(367);
-                        mainApp->mainPage->titleImage->SetX(-113);
-                        mainApp->mainPage->appVersionText->SetX(367);
-                        mainApp->netinstPage->titleImage->SetX(-113);
-                        mainApp->netinstPage->appVersionText->SetX(367);
-                        mainApp->remoteinstPage->titleImage->SetX(-113);
-                        mainApp->remoteinstPage->appVersionText->SetX(367);
-                        mainApp->optionspage->titleImage->SetX(-113);
-                        mainApp->optionspage->appVersionText->SetX(367);
-                        mainApp->sdinstPage->titleImage->SetX(-113);
-                        mainApp->sdinstPage->appVersionText->SetX(367);
-                        mainApp->usbinstPage->titleImage->SetX(-113);
-                        mainApp->usbinstPage->appVersionText->SetX(367);
+                        mainApp->instpage->titleImage->SetX(0);
+                        mainApp->instpage->appVersionText->SetX(300);
+                        mainApp->mainPage->titleImage->SetX(0);
+                        mainApp->mainPage->appVersionText->SetX(300);
+                        mainApp->netinstPage->titleImage->SetX(0);
+                        mainApp->netinstPage->appVersionText->SetX(300);
+                        mainApp->remoteinstPage->titleImage->SetX(0);
+                        mainApp->remoteinstPage->appVersionText->SetX(300);
+                        mainApp->optionspage->titleImage->SetX(0);
+                        mainApp->optionspage->appVersionText->SetX(300);
+                        mainApp->sdinstPage->titleImage->SetX(0);
+                        mainApp->sdinstPage->appVersionText->SetX(300);
+                        mainApp->usbinstPage->titleImage->SetX(0);
+                        mainApp->usbinstPage->appVersionText->SetX(300);
                     }
                     inst::config::setConfig();
                     this->refreshOptions();

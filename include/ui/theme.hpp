@@ -19,6 +19,15 @@ namespace inst::ui::theme {
     pu::ui::Color Green();
     std::string Background();
     std::string Logo();
+    // Light themes get blue-tinted copies of the white icons.
+    std::string Icon(const std::string& file);
+    // Curved bar along the bottom edge, behind the button hints.
+    pu::ui::elm::Image::Ref BottomBar();
+
+    // Hand pointer: right stick or controller motion moves it; hovering focuses grid tiles.
+    void PointerTick();
+    bool PointerHover(int& x, int& y); // true on frames the pointer moved
+    void AttachPointer();              // adds the hand on top of every page
 
     // Theme dialog; a new pick is saved and every page is rebuilt in it.
     void Pick(bool backToOptions);

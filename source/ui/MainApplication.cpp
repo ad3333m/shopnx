@@ -131,7 +131,9 @@ namespace inst::ui {
         this->LoadLayout(this->mainPage);
 
         inst::ui::theme::MusicInit();
+        inst::ui::theme::AttachPointer();
         this->AddThread(inst::ui::theme::MusicTick);
+        this->AddThread(inst::ui::theme::PointerTick);
         this->AddThread([this]() {
             this->RefreshInputDevice();
         });

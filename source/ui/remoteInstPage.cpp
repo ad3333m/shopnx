@@ -936,12 +936,12 @@ namespace inst::ui {
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->infoRect = Rectangle::New(0, 75, 1280, 60, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
-            this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
@@ -999,8 +999,8 @@ namespace inst::ui {
             this->menu->SetOnFocusColor(COLOR("#00000033"));
             this->menu->SetScrollbarColor(COLOR("#141A2E80"));
         }
-        this->infoImage = Image::New(34, 90, "romfs:/images/icons/remote-connection-waiting.png");
-        this->previewImage = Image::New(900, 230, "romfs:/images/icons/title-placeholder.png");
+        this->infoImage = Image::New(34, 90, inst::ui::theme::Icon("remote-connection-waiting.png"));
+        this->previewImage = Image::New(900, 230, inst::ui::theme::Icon("title-placeholder.png"));
         this->previewImage->SetWidth(320);
         this->previewImage->SetHeight(320);
         this->gridHighlight = Rectangle::New(0, 0, kCardWidth + 6, kCardHeight + 6, inst::ui::theme::Accent(), 19);
@@ -1024,7 +1024,7 @@ namespace inst::ui {
         this->gridHighlight->SetVisible(false);
         this->gridImages.reserve(kGridItemsPerPage);
         for (int i = 0; i < kGridItemsPerPage; i++) {
-            auto img = Image::New(0, 0, "romfs:/images/icons/title-placeholder.png");
+            auto img = Image::New(0, 0, inst::ui::theme::Icon("title-placeholder.png"));
             img->SetWidth(kGridTileWidth);
             img->SetHeight(kGridTileHeight);
             img->SetVisible(false);
@@ -1039,7 +1039,7 @@ namespace inst::ui {
         }
         this->remoteGridSelectIcons.reserve(kGridItemsPerPage);
         for (int i = 0; i < kGridItemsPerPage; i++) {
-            auto icon = Image::New(0, 0, "romfs:/images/icons/title_selected.png");
+            auto icon = Image::New(0, 0, inst::ui::theme::Icon("title_selected.png"));
             icon->SetWidth(120);
             icon->SetHeight(120);
             icon->SetVisible(false);
@@ -1107,6 +1107,7 @@ namespace inst::ui {
         this->Add(this->topRect);
         this->Add(this->infoRect);
         this->Add(this->botRect);
+        this->Add(inst::ui::theme::BottomBar());
         this->Add(this->titleImage);
         this->Add(this->appVersionText);
         this->Add(this->sysBarBack);
@@ -3116,7 +3117,7 @@ namespace inst::ui {
                 }
                 nsExit();
             }
-            this->previewImage->SetImage("romfs:/images/icons/title-placeholder.png");
+            this->previewImage->SetImage(inst::ui::theme::Icon("title-placeholder.png"));
             applyPreviewLayout();
             this->previewImage->SetVisible(true);
             this->refreshImageLoadingText();
@@ -3148,7 +3149,7 @@ namespace inst::ui {
             this->refreshImageLoadingText();
         }
 
-        this->previewImage->SetImage("romfs:/images/icons/title-placeholder.png");
+        this->previewImage->SetImage(inst::ui::theme::Icon("title-placeholder.png"));
         applyPreviewLayout();
         this->previewImage->SetVisible(true);
         this->refreshImageLoadingText();
@@ -3360,9 +3361,9 @@ namespace inst::ui {
             auto entry = pu::ui::elm::MenuItem::New(itm);
             entry->SetColor(COLOR("#FFFFFFFF"));
             if (!installedSection && !saveSyncSection && !cheatsSection) {
-                entry->SetIcon("romfs:/images/icons/checkbox-blank-outline.png");
+                entry->SetIcon(inst::ui::theme::Icon("checkbox-blank-outline.png"));
                 if (!item.url.empty() && selectedUrls.find(item.url) != selectedUrls.end())
-                    entry->SetIcon("romfs:/images/icons/check-box-outline.png");
+                    entry->SetIcon(inst::ui::theme::Icon("check-box-outline.png"));
             }
             this->menu->AddItem(entry);
         }
@@ -3431,8 +3432,8 @@ namespace inst::ui {
         for (std::size_t i = 0; i < count; i++) {
             const auto& item = this->visibleItems[i];
             const bool isSelected = !item.url.empty() && selectedUrls.find(item.url) != selectedUrls.end();
-            menuItems[i]->SetIcon(isSelected ? "romfs:/images/icons/check-box-outline.png"
-                                             : "romfs:/images/icons/checkbox-blank-outline.png");
+            menuItems[i]->SetIcon(isSelected ? inst::ui::theme::Icon("check-box-outline.png")
+                                             : inst::ui::theme::Icon("checkbox-blank-outline.png"));
         }
     }
 
@@ -3523,7 +3524,7 @@ namespace inst::ui {
                 }
 
                 if (!applied) {
-                    this->gridImages[i]->SetImage("romfs:/images/icons/title-placeholder.png");
+                    this->gridImages[i]->SetImage(inst::ui::theme::Icon("title-placeholder.png"));
                     this->gridImages[i]->SetWidth(kGridTileWidth);
                     this->gridImages[i]->SetHeight(kGridTileHeight);
                 }
@@ -3672,7 +3673,7 @@ namespace inst::ui {
                 }
 
                 if (!applied) {
-                    this->gridImages[i]->SetImage("romfs:/images/icons/title-placeholder.png");
+                    this->gridImages[i]->SetImage(inst::ui::theme::Icon("title-placeholder.png"));
                     this->gridImages[i]->SetWidth(kGridTileWidth);
                     this->gridImages[i]->SetHeight(kGridTileHeight);
                 }
@@ -4420,6 +4421,22 @@ namespace inst::ui {
 
     void remoteInstPage::onInput(u64 Down, u64 Up, u64 Held, pu::ui::Touch Pos) {
         this->updateCartPill();
+        if (int px, py; this->remoteGridMode && !this->visibleItems.empty() && inst::ui::theme::PointerHover(px, py)) {
+            const bool installed = this->isInstalledSection();
+            int& index = installed ? this->gridSelectedIndex : this->remoteGridIndex;
+            const int pageStart = (std::max(index, 0) / kGridItemsPerPage) * kGridItemsPerPage;
+            for (int slot = 0; slot < kGridItemsPerPage; slot++) {
+                const int cx = kGridStartX - kCardPad + ((slot % kGridCols) * kGridStepX);
+                const int cy = kGridStartY - kCardPad + ((slot / kGridCols) * kGridStepY);
+                const int itemIndex = pageStart + slot;
+                if (px >= cx && px < cx + kCardWidth && py >= cy && py < cy + kCardHeight
+                    && itemIndex < static_cast<int>(this->visibleItems.size()) && itemIndex != index) {
+                    index = itemIndex;
+                    if (installed) this->updateInstalledGrid();
+                    else this->updateRemoteGrid();
+                }
+            }
+        }
         int bottomTapX = 0;
         if (DetectBottomHintTap(Pos, this->bottomHintTouch, 668, 52, bottomTapX)) {
             Down |= FindBottomHintButton(this->bottomHintSegments, bottomTapX);

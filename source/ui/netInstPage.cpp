@@ -30,12 +30,12 @@ namespace inst::ui {
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->infoRect = Rectangle::New(0, 75, 1280, 60, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
-            this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
@@ -78,10 +78,11 @@ namespace inst::ui {
             this->menu->SetOnFocusColor(COLOR("#00000033"));
             this->menu->SetScrollbarColor(COLOR("#141A2E80"));
         }
-        this->infoImage = Image::New(453, 292, "romfs:/images/icons/lan-connection-waiting.png");
+        this->infoImage = Image::New(453, 292, inst::ui::theme::Icon("lan-connection-waiting.png"));
         this->Add(this->topRect);
         this->Add(this->infoRect);
         this->Add(this->botRect);
+        this->Add(inst::ui::theme::BottomBar());
         this->Add(this->titleImage);
         this->Add(this->appVersionText);
         this->Add(this->sysBarBack);
@@ -115,10 +116,10 @@ namespace inst::ui {
             std::string itm = inst::util::shortenString(inst::util::formatUrlString(url), 56, true);
             auto ourEntry = pu::ui::elm::MenuItem::New(itm);
             ourEntry->SetColor(COLOR("#FFFFFFFF"));
-            ourEntry->SetIcon("romfs:/images/icons/checkbox-blank-outline.png");
+            ourEntry->SetIcon(inst::ui::theme::Icon("checkbox-blank-outline.png"));
             for (long unsigned int i = 0; i < this->selectedUrls.size(); i++) {
                 if (this->selectedUrls[i] == url) {
-                    ourEntry->SetIcon("romfs:/images/icons/check-box-outline.png");
+                    ourEntry->SetIcon(inst::ui::theme::Icon("check-box-outline.png"));
                 }
             }
             this->menu->AddItem(ourEntry);
@@ -126,7 +127,7 @@ namespace inst::ui {
     }
 
     void netInstPage::selectTitle(int selectedIndex) {
-        if (this->menu->GetItems()[selectedIndex]->GetIcon() == "romfs:/images/icons/check-box-outline.png") {
+        if (this->menu->GetItems()[selectedIndex]->GetIcon() == inst::ui::theme::Icon("check-box-outline.png")) {
             for (long unsigned int i = 0; i < this->selectedUrls.size(); i++) {
                 if (this->selectedUrls[i] == this->ourUrls[selectedIndex]) this->selectedUrls.erase(this->selectedUrls.begin() + i);
             }
@@ -235,7 +236,7 @@ namespace inst::ui {
             if (this->selectedUrls.size() == this->menu->GetItems().size()) this->drawMenuItems(true);
             else {
                 for (long unsigned int i = 0; i < this->menu->GetItems().size(); i++) {
-                    if (this->menu->GetItems()[i]->GetIcon() == "romfs:/images/icons/check-box-outline.png") continue;
+                    if (this->menu->GetItems()[i]->GetIcon() == inst::ui::theme::Icon("check-box-outline.png")) continue;
                     else this->selectTitle(i);
                 }
                 this->drawMenuItems(false);

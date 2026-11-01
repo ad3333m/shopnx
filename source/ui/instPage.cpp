@@ -134,12 +134,12 @@ namespace inst::ui {
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->infoRect = Rectangle::New(0, 75, 1280, 60, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
-            this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
@@ -196,6 +196,7 @@ namespace inst::ui {
         this->Add(this->topRect);
         this->Add(this->infoRect);
         this->Add(this->botRect);
+        this->Add(inst::ui::theme::BottomBar());
         this->Add(this->titleImage);
         this->Add(this->appVersionText);
         this->Add(this->sysBarBack);

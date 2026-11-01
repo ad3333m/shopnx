@@ -34,9 +34,9 @@ namespace inst::ui {
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto infoColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->infoRect = Rectangle::New(0, 75, 1280, 60, infoColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, infoColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->infoRect = Rectangle::New(0, 75, 1280, 60, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
         this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion, 22);
         this->appVersionText->SetColor(COLOR("#FFFFFFFF"));
@@ -71,7 +71,7 @@ namespace inst::ui {
         this->menu->SetOnFocusColor(inst::config::oledMode ? COLOR("#FFFFFF33") : COLOR("#7B61FF55"));
         this->menu->SetScrollbarColor(COLOR("#141A2E80"));
         for (auto e : std::initializer_list<pu::ui::elm::Element::Ref>{
-                 this->topRect, this->infoRect, this->botRect, this->titleImage, this->appVersionText,
+                 this->topRect, this->infoRect, this->botRect, inst::ui::theme::BottomBar(), this->titleImage, this->appVersionText,
                  this->sysBarBack, this->sysBarFill, this->sdBarBack, this->sdBarFill,
                  this->sysLabelText, this->sysFreeText, this->sdLabelText, this->sdFreeText,
                  this->netIndicator, this->wifiBar1, this->wifiBar2, this->wifiBar3,
@@ -130,7 +130,7 @@ namespace inst::ui {
             label += "   " + FormatSize(t.size);
             auto item = pu::ui::elm::MenuItem::New(label);
             item->SetColor(COLOR("#FFFFFFFF"));
-            item->SetIcon("romfs:/images/icons/apps.png");
+            item->SetIcon(inst::ui::theme::Icon("apps.png"));
             this->menu->AddItem(item);
         }
         this->pageInfoText->SetText("Installed games (" + std::to_string(this->titles.size()) + ")");

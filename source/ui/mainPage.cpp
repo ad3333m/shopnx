@@ -268,11 +268,11 @@ namespace inst::ui {
         }
         const auto topColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2EFF");
         const auto botColor = inst::config::oledMode ? COLOR("#000000FF") : COLOR("#141A2E80");
-        this->topRect = Rectangle::New(0, 0, 1280, 74, topColor);
-        this->botRect = Rectangle::New(0, 660, 1280, 60, botColor);
+        this->topRect = Rectangle::New(0, 0, 1280, 74, pu::ui::Color(0, 0, 0, 0));
+        this->botRect = Rectangle::New(0, 660, 1280, 60, pu::ui::Color(0, 0, 0, 0));
         if (inst::config::gayMode) {
-            this->titleImage = Image::New(-113, -8, inst::ui::theme::Logo());
-            this->appVersionText = TextBlock::New(367, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
+            this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
+            this->appVersionText = TextBlock::New(300, 29, "v" + inst::config::appVersion + (inst::config::appGitMeta.empty() ? "" : ("\n" + inst::config::appGitMeta)), 22);
         }
         else {
             this->titleImage = Image::New(0, -8, inst::ui::theme::Logo());
@@ -326,31 +326,31 @@ namespace inst::ui {
         this->backupUserPickerHint->SetVisible(false);
         this->installMenuItem = pu::ui::elm::MenuItem::New("main.menu.sd"_lang);
         this->installMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->installMenuItem->SetIcon("romfs:/images/icons/micro-sd.png");
+        this->installMenuItem->SetIcon(inst::ui::theme::Icon("micro-sd.png"));
         this->netInstallMenuItem = pu::ui::elm::MenuItem::New("main.menu.net"_lang);
         this->netInstallMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->netInstallMenuItem->SetIcon("romfs:/images/icons/cloud-download.png");
+        this->netInstallMenuItem->SetIcon(inst::ui::theme::Icon("cloud-download.png"));
         this->remoteInstallMenuItem = pu::ui::elm::MenuItem::New("main.menu.remote"_lang);
         this->remoteInstallMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->remoteInstallMenuItem->SetIcon("romfs:/images/icons/remote.png");
+        this->remoteInstallMenuItem->SetIcon(inst::ui::theme::Icon("remote.png"));
         this->usbInstallMenuItem = pu::ui::elm::MenuItem::New("main.menu.usb"_lang);
         this->usbInstallMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->usbInstallMenuItem->SetIcon("romfs:/images/icons/usb-port.png");
+        this->usbInstallMenuItem->SetIcon(inst::ui::theme::Icon("usb-port.png"));
         this->hddInstallMenuItem = pu::ui::elm::MenuItem::New("main.menu.hdd"_lang);
         this->hddInstallMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->hddInstallMenuItem->SetIcon("romfs:/images/icons/usb-install.png");
+        this->hddInstallMenuItem->SetIcon(inst::ui::theme::Icon("usb-install.png"));
         this->mtpInstallMenuItem = pu::ui::elm::MenuItem::New("main.menu.mtp"_lang);
         this->mtpInstallMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->mtpInstallMenuItem->SetIcon("romfs:/images/icons/usb-port.png");
+        this->mtpInstallMenuItem->SetIcon(inst::ui::theme::Icon("usb-port.png"));
         this->backupSaveDataMenuItem = pu::ui::elm::MenuItem::New("main.menu.backup"_lang);
         this->backupSaveDataMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->backupSaveDataMenuItem->SetIcon("romfs:/images/icons/save-data-cloud.png");
+        this->backupSaveDataMenuItem->SetIcon(inst::ui::theme::Icon("save-data-cloud.png"));
         this->settingsMenuItem = pu::ui::elm::MenuItem::New("main.menu.set"_lang);
         this->settingsMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->settingsMenuItem->SetIcon("romfs:/images/icons/settings.png");
+        this->settingsMenuItem->SetIcon(inst::ui::theme::Icon("settings.png"));
         this->exitMenuItem = pu::ui::elm::MenuItem::New("main.menu.exit"_lang);
         this->exitMenuItem->SetColor(COLOR("#FFFFFFFF"));
-        this->exitMenuItem->SetIcon("romfs:/images/icons/exit-run.png");
+        this->exitMenuItem->SetIcon(inst::ui::theme::Icon("exit-run.png"));
         const auto tileColor = inst::config::oledMode ? COLOR("#1A1A1ACC") : COLOR("#141A2ECC");
         const auto highlightColor = inst::ui::theme::Accent();
         const std::vector<std::string> gridLabels = {
@@ -366,16 +366,16 @@ namespace inst::ui {
             "main.menu.exit"_lang
         };
         const std::vector<std::string> gridIcons = {
-            "romfs:/images/icons/apps.png",
-            "romfs:/images/icons/remote.png",
-            "romfs:/images/icons/micro-sd.png",
-            "romfs:/images/icons/usb-install.png",
-            "romfs:/images/icons/usb-port.png",
-            "romfs:/images/icons/usb-port.png",
-            "romfs:/images/icons/cloud-download.png",
-            "romfs:/images/icons/save-data-cloud.png",
-            "romfs:/images/icons/settings.png",
-            "romfs:/images/icons/exit-run.png"
+            inst::ui::theme::Icon("apps.png"),
+            inst::ui::theme::Icon("remote.png"),
+            inst::ui::theme::Icon("micro-sd.png"),
+            inst::ui::theme::Icon("usb-install.png"),
+            inst::ui::theme::Icon("usb-port.png"),
+            inst::ui::theme::Icon("usb-port.png"),
+            inst::ui::theme::Icon("cloud-download.png"),
+            inst::ui::theme::Icon("save-data-cloud.png"),
+            inst::ui::theme::Icon("settings.png"),
+            inst::ui::theme::Icon("exit-run.png")
         };
         this->mainGridTiles.reserve(kMainGridCols * kMainGridRows);
         this->mainGridIcons.reserve(kMainGridCols * kMainGridRows);
@@ -410,6 +410,7 @@ namespace inst::ui {
         this->Add(this->awooImage);
         this->Add(this->topRect);
         this->Add(this->botRect);
+        this->Add(inst::ui::theme::BottomBar());
         this->Add(this->titleImage);
         this->Add(this->appVersionText);
         this->Add(this->sysBarBack);
@@ -898,6 +899,16 @@ namespace inst::ui {
         }
         if (Down & HidNpadButton_Y) {
             this->showSelectedMainInfo();
+        }
+        if (int px, py; inst::ui::theme::PointerHover(px, py)) {
+            for (int i = 0; i < (kMainGridCols * kMainGridRows); i++) {
+                const int x = kMainGridStartX + ((i % kMainGridCols) * (kMainGridTileWidth + kMainGridGapX));
+                const int y = kMainGridStartY + ((i / kMainGridCols) * (kMainGridTileHeight + kMainGridGapY));
+                if (px >= x && px < x + kMainGridTileWidth && py >= y && py < y + kMainGridTileHeight && i != this->selectedMainIndex) {
+                    this->selectedMainIndex = i;
+                    this->updateMainGridSelection();
+                }
+            }
         }
         if (Down & HidNpadButton_L) inst::ui::theme::MusicPrev();
         if (Down & HidNpadButton_R) inst::ui::theme::MusicNext();
